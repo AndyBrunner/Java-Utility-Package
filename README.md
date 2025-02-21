@@ -4,5 +4,6 @@
 
 ---
 
-The full documentation and all downloads are available at [https://java-util.k43.ch](https://java-util.k43.ch)
+- Package documentation and downloads: [Website](https://java-util.k43.ch)
+- JavaDoc API documentation: [JavaDoc](https://andybrunner.github.io/Java-Utility-Package/ch/k43/util/package-summary.html)
 
