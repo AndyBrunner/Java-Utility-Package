@@ -1000,7 +1000,7 @@ public class K {
 	/**
 	 * Return current directory.<br>
 	 * 
-	 * @deprecated Use K.CURRENT_DIRECTORY
+	 * @deprecated Use K.CURRENT_DIRECTORY instead
 	 * 
 	 * @return Current directory, e.g. "/Users/johnsmith"
 	 * 
