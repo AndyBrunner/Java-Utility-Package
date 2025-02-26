@@ -139,7 +139,7 @@ public class K {
 	//
 	private static final	Random				SIMPLE_RANDOMIZER	= new Random();
 	private static final	SecureRandom		SECURE_RANDOM		= new SecureRandom();
-	private static final 	String				VERSION_URL			= "https://k43.ch/java-util/version.txt";	
+	private static final 	String				VERSION_URL			= "https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt";	
 	private static final 	String				AES_256_CIPHER		= "AES/CBC/PKCS5Padding";
 	private static final 	String				SHA_256				= "SHA-256";
 	
