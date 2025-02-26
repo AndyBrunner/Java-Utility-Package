@@ -449,6 +449,19 @@ public class KSocketClient implements AutoCloseable{
 	}
 	
 	/**
+	 * String representation of object.
+	 * 
+	 * @since 2024.08.23
+	 */
+	@Override
+	public String toString() {
+		return "KSocketClient [gTLSSocket=" + gTLSSocket + ", gNoTLSSocket=" + gNoTLSSocket + ", gBufferedReader="
+				+ gBufferedReader + ", gBufferedWriter=" + gBufferedWriter + ", gUsedProtocol=" + gUsedProtocol
+				+ ", gUsedCiphers=" + gUsedCiphers + ", gAuthenticatedClient=" + gAuthenticatedClient
+				+ ", gLastErrorMessage=" + gLastErrorMessage + "]";
+	}
+	
+	/**
 	 * Write byte array to socket
 	 * 
 	 * @param argData	Byte array to be written
@@ -471,7 +484,7 @@ public class KSocketClient implements AutoCloseable{
 			return (false);
 		}
 	}
-	
+
 	/**
 	 * Write character array to socket
 	 * 
@@ -518,18 +531,5 @@ public class KSocketClient implements AutoCloseable{
 			KLog.error(gLastErrorMessage);
 			return (false);
 		}
-	}
-
-	/**
-	 * String representation of object.
-	 * 
-	 * @since 2024.08.23
-	 */
-	@Override
-	public String toString() {
-		return "KSocketClient [gTLSSocket=" + gTLSSocket + ", gNoTLSSocket=" + gNoTLSSocket + ", gBufferedReader="
-				+ gBufferedReader + ", gBufferedWriter=" + gBufferedWriter + ", gUsedProtocol=" + gUsedProtocol
-				+ ", gUsedCiphers=" + gUsedCiphers + ", gAuthenticatedClient=" + gAuthenticatedClient
-				+ ", gLastErrorMessage=" + gLastErrorMessage + "]";
 	}
 }

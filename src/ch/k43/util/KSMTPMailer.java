@@ -533,6 +533,23 @@ public class KSMTPMailer {
 	}
 	
 	/**
+	 * String representation of object.
+	 * 
+	 * @since 2024.08.23
+	 */
+	@Override
+	public String toString() {
+		return "KSMTPMailer [gMimeMultipart=" + gMimeMultipart + ", gJakartaMailLog=" + gJakartaMailLog
+				+ ", gLastErrorMessage=" + gLastErrorMessage + ", gSubject=" + gSubject + ", gSubjectCharSet="
+				+ gSubjectCharSet + ", gFromAddress=" + gFromAddress + ", gToAddresses=" + gToAddresses
+				+ ", gCCAddresses=" + gCCAddresses + ", gBCCAddresses=" + gBCCAddresses + ", gReplyToAddress="
+				+ gReplyToAddress + ", gSMTPHostName=" + gSMTPHostName + ", gUserName=" + gUserName + ", gUserPassword="
+				+ gUserPassword + ", gUnsubscribe=" + gUnsubscribe + ", gSMTPHostPort=" + gSMTPHostPort
+				+ ", gMimeMessageSize=" + gMimeMessageSize + ", gSecureConnection=" + gSecureConnection
+				+ ", gMultiPartAdded=" + gMultiPartAdded + ", gOAuth2Authentication=" + gOAuth2Authentication + "]";
+	}
+
+	/**
 	 * Write Jakarta log to KLog
 	 * 
 	 * @since 2024.06.03
@@ -562,22 +579,5 @@ public class KSMTPMailer {
 		}
 		
 		gJakartaMailLog = null;
-	}
-
-	/**
-	 * String representation of object.
-	 * 
-	 * @since 2024.08.23
-	 */
-	@Override
-	public String toString() {
-		return "KSMTPMailer [gMimeMultipart=" + gMimeMultipart + ", gJakartaMailLog=" + gJakartaMailLog
-				+ ", gLastErrorMessage=" + gLastErrorMessage + ", gSubject=" + gSubject + ", gSubjectCharSet="
-				+ gSubjectCharSet + ", gFromAddress=" + gFromAddress + ", gToAddresses=" + gToAddresses
-				+ ", gCCAddresses=" + gCCAddresses + ", gBCCAddresses=" + gBCCAddresses + ", gReplyToAddress="
-				+ gReplyToAddress + ", gSMTPHostName=" + gSMTPHostName + ", gUserName=" + gUserName + ", gUserPassword="
-				+ gUserPassword + ", gUnsubscribe=" + gUnsubscribe + ", gSMTPHostPort=" + gSMTPHostPort
-				+ ", gMimeMessageSize=" + gMimeMessageSize + ", gSecureConnection=" + gSecureConnection
-				+ ", gMultiPartAdded=" + gMultiPartAdded + ", gOAuth2Authentication=" + gOAuth2Authentication + "]";
 	}
 }

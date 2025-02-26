@@ -339,6 +339,20 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	}
 	
 	/**
+	 * String representation of object.
+	 * 
+	 * @since 2024.08.23
+	 */
+	@Override
+	public String toString() {
+		return "KSocketServerThread [gSocket=" + gSocket + ", gBufferedReader=" + gBufferedReader + ", gBufferedWriter="
+				+ gBufferedWriter + ", gThisClassName=" + gThisClassName + ", gUsedProtocol=" + gUsedProtocol
+				+ ", gUsedCiphers=" + gUsedCiphers + ", gLastErrorMessage=" + gLastErrorMessage
+				+ ", gAuthenticatedClient=" + gAuthenticatedClient + ", gPortNumber=" + gPortNumber + ", gIsConnected="
+				+ gIsConnected + ", gIsSecuredConnection=" + gIsSecuredConnection + "]";
+	}
+	
+	/**
 	 * Write byte array to socket.<br>
 	 * 
 	 * @param	argData	Byte array to be written
@@ -385,7 +399,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 			return (false);
 		}
 	}
-	
+
 	/**
 	 * Write string to socket.<br>
 	 * 
@@ -420,19 +434,5 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	 */
 	public boolean writeLine(String argLine) {
 		return (write(argLine + K.LINE_SEPARATOR));
-	}
-
-	/**
-	 * String representation of object.
-	 * 
-	 * @since 2024.08.23
-	 */
-	@Override
-	public String toString() {
-		return "KSocketServerThread [gSocket=" + gSocket + ", gBufferedReader=" + gBufferedReader + ", gBufferedWriter="
-				+ gBufferedWriter + ", gThisClassName=" + gThisClassName + ", gUsedProtocol=" + gUsedProtocol
-				+ ", gUsedCiphers=" + gUsedCiphers + ", gLastErrorMessage=" + gLastErrorMessage
-				+ ", gAuthenticatedClient=" + gAuthenticatedClient + ", gPortNumber=" + gPortNumber + ", gIsConnected="
-				+ gIsConnected + ", gIsSecuredConnection=" + gIsSecuredConnection + "]";
 	}
 }

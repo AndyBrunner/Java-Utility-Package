@@ -266,6 +266,19 @@ public class KHTTPClient {
 	}
 		
 	/**
+	 * String representation of object.
+	 * 
+	 * @since 2024.08.23
+	 */
+	@Override
+	public String toString() {
+		return "KHTTPClient [gHTTPResponseHeaders=" + gHTTPResponseHeaders + ", gHTTPResponseData="
+				+ Arrays.toString(gHTTPResponseData) + ", gHTTPErrorMessage=" + gHTTPErrorMessage
+				+ ", gHTTPResponseTimeMs=" + gHTTPResponseTimeMs + ", gHTTPResponseCode=" + gHTTPResponseCode
+				+ ", gHTTPTimeOutSec=" + gHTTPTimeOutSec + "]";
+	}
+
+	/**
 	 * Execute HTTP request.<br>
 	 * 
 	 * @param 	argHTTPMethod	HTTP method (GET, POST, etc)
@@ -502,18 +515,5 @@ public class KHTTPClient {
 			gHTTPErrorMessage = "HTTP response code " + gHTTPResponseCode;
 			return (false);
 		}
-	}
-
-	/**
-	 * String representation of object.
-	 * 
-	 * @since 2024.08.23
-	 */
-	@Override
-	public String toString() {
-		return "KHTTPClient [gHTTPResponseHeaders=" + gHTTPResponseHeaders + ", gHTTPResponseData="
-				+ Arrays.toString(gHTTPResponseData) + ", gHTTPErrorMessage=" + gHTTPErrorMessage
-				+ ", gHTTPResponseTimeMs=" + gHTTPResponseTimeMs + ", gHTTPResponseCode=" + gHTTPResponseCode
-				+ ", gHTTPTimeOutSec=" + gHTTPTimeOutSec + "]";
 	}
 }

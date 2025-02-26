@@ -8,13 +8,6 @@ package ch.k43.util;
 public class KHelloWorld {
 
 	/**
-	 * Default constructor
-	 */
-	public KHelloWorld() {
-		// Default constructor
-	}
-	
-	/**
 	 * Main entry point
 	 * 
 	 * @param args Command line arguments
@@ -32,5 +25,12 @@ public class KHelloWorld {
 		System.out.println("JVM version " + K.JVM_MAJOR_VERSION + " running on " + K.JVM_PLATFORM);
 			
 		KLog.info("Hello World ended");
+	}
+	
+	/**
+	 * Default constructor
+	 */
+	public KHelloWorld() {
+		// Default constructor
 	}
 }

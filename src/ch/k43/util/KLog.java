@@ -185,7 +185,7 @@ public class KLog {
 					System.getProperty("java.class.path", "n/a").trim());
 			
 			// User name
-			debug("User {}, language {}, directory {}",
+			debug("Current user {}, language {}, directory {}",
 					K.USER_NAME,
 					K.USER_LANGUAGE,
 					K.HOME_DIRECTORY);

@@ -52,7 +52,7 @@ public class K {
 	/**
 	 * Package version number. Example: "2025.01.24".
 	 */
-	public static final		String				VERSION				= "2025.02.21";			// Change for each new release / Also modify version.txt
+	public static final		String				VERSION				= "2025.02.26";			// Also change version-check/version.txt
 	
 	/**
 	 * Application start time.
@@ -60,22 +60,22 @@ public class K {
 	public static final		Calendar			START_TIME			= Calendar.getInstance();
 	
 	/**
-	 * Platform dependent line separator. Examples: "\r", "\n", "\r\n".
+	 * Platform dependent line separator. Examples are "\r", "\n", "\r\n".
 	 */
 	public static final 	String				LINE_SEPARATOR		= System.lineSeparator();
 	
 	/**
-	 * Platform dependent file separator. Examples: "/", "\".
+	 * Platform dependent file separator. Examples are "/", "\".
 	 */
 	public static final 	String				FILE_SEPARATOR		= File.separator;
 	
 	/**
-	 * Platform dependent path separator. Examples: ":", ";".
+	 * Platform dependent path separator. Examples are ":", ";".
 	 */
 	public static final 	String				PATH_SEPARATOR		= File.pathSeparator;
 	
 	/**
-	 * User name. Example: "joesmith".
+	 * User name. Example are "joesmith", "bob".
 	 */
 	public static final 	String				USER_NAME			= System.getProperty("user.name", "n/a").trim();
 	
@@ -95,7 +95,7 @@ public class K {
 	public static final 	String				TEMP_DIRECTORY;		// Initialized in static block
 	
 	/**
-	 * User language. Examples: "en", "fr", "de".
+	 * User language. Examples are "en", "fr", "de".
 	 */
 	public static final 	String				USER_LANGUAGE		= System.getProperty("user.language", "en").trim();
 	
@@ -110,26 +110,32 @@ public class K {
 	public static final		int					JVM_MAJOR_VERSION;	// Initialized in static block
 
 	/**
-	 * JVM version name. Example: "Java HotSpot(TM) 64-Bit Server VM - Oracle Corporation"
+	 * JVM version name. Example is "Java HotSpot(TM) 64-Bit Server VM - Oracle Corporation"
 	 */
 	public static final 	String				JVM_VERSION_NAME	= System.getProperty("java.vm.name", "n/a").trim() + " - " + System.getProperty("java.vendor", "n/a").trim();
 
 	/**
-	 * JVM platform. Example: "Mac OS X Version 15.3.1/aarch64"
+	 * JVM platform. Example is "Mac OS X Version 15.3.1/aarch64"
 	 */
 	public static final 	String				JVM_PLATFORM		= System.getProperty("os.name", "n/a").trim() + " Version " + System.getProperty("os.version", "n/a").trim() + '/' +  System.getProperty("os.arch", "n/a").trim();
 	
-	//
-	// Package variables
-	//
-	protected static final 	int					JVM_MINIMAL_VERSION	= 8;
-	protected static final	int					MAX_SAVED_ERRORS	= 10;
-
-	// Per-thread local storage @see getLocalData()
-	protected static HashMap<Thread, KLocalData> gLocalData			= new HashMap<>(1);		
-
+	/**
+	 * Minimum JVM version supported
+	 */
+	public static final 	int					JVM_MINIMAL_VERSION	= 8;
+	
+	/**
+	 * Maximum number of saved errors
+	 */
+	public static final		int					MAX_SAVED_ERRORS	= 10;
+	
 	//
 	// Private class variables
+	//
+	private static HashMap<Thread, KLocalData>	gLocalData			= new HashMap<>(1);		
+
+	//
+	// Private class constants
 	//
 	private static final	Random				SIMPLE_RANDOMIZER	= new Random();
 	private static final	SecureRandom		SECURE_RANDOM		= new SecureRandom();
@@ -1012,6 +1018,38 @@ public class K {
 	}
 	
 	/**
+	 * Return the currently available version of this package.
+	 * 
+	 * The check is done by fetching https://github.com/AndyBrunner/Java-Utility-Package/version-check/version.txt
+	 * 
+	 * @return Current version number (YYYY-MM-DD) or null if web site is not reachable
+	 * 
+	 * @since 2025.02.23
+	 */
+	public static String getCurrentVersionNumber() {
+		
+		KLog.debug("Checking for current version of package ch.k43.util");
+		
+		KHTTPClient http = new KHTTPClient();
+		
+		if (!http.get(K.VERSION_URL)) {
+			KLog.error("Unable to read from {}: {}", K.VERSION_URL, http.getLastError());
+			return null;
+		}
+		
+		// Get current version
+		String currentVersion = http.getResponseDataAsString().trim();
+		
+		if (K.isEmpty(currentVersion) || (currentVersion.length() != 10)) {
+			KLog.error("Unable to get current version from {} - Data received {}", K.VERSION_URL, currentVersion);
+			return null;
+		}
+		
+		KLog.debug("Currently available version is {}", currentVersion);
+		return currentVersion;
+	}
+	
+	/**
 	 * Return IP address of hostname
 	 * 
 	 * @param	argHostname	Hostname
@@ -1089,7 +1127,7 @@ public class K {
 	public static String getJVMPlatform() {
 		return JVM_PLATFORM;
 	}
-	
+		
 	/**
 	 * Return JVM major version (Example: 1.9.x as 9, 12.4 as 12).
 	 * 
@@ -1101,7 +1139,7 @@ public class K {
 	public static int getJVMVersion() {
 		return JVM_MAJOR_VERSION;
 	}
-		
+	
 	/**
 	 * Return the last error message. 
 	 * 
@@ -1214,7 +1252,7 @@ public class K {
 	 * Generate hash from password with salt. The hashing is repeated for the number of iterations with SHA3-512(password + salt).
 	 *
 	 * @param argPassword	Password to be hashed
-	 * @param argSalt		Salt to be added to password (should be at least 16 bytes and unique for each password)
+	 * @param argSalt		Salt to be added to password (should be at least 32 bytes and must be unique for each password)
 	 * @param argIteration	Number of hash cycles (recommended between 100'000 and 1'000'000)
 	 *
 	 * @return Hashed password (64 bytes)
@@ -1252,12 +1290,12 @@ public class K {
 		KLog.debug("Password hash completed ({} iterations, {} ms)", argIteration, timer.getElapsedMilliseconds());
 		return passwordHash;
 	}
-	
+
 	/**
 	 * Generate hash from password with salt. The hashing is repeated 500'000 times with SHA3-512(password + salt).
 	 *
 	 * @param argPassword	Password to be hashed
-	 * @param argSalt		Salt to be added to password (should be at least 16 bytes and unique for each password)
+	 * @param argSalt		Salt to be added to password (should be at least 32 bytes and must be unique for each password)
 	 *
 	 * @return Hashed password (64 bytes)
 	 * 
@@ -1271,7 +1309,7 @@ public class K {
 		
 		return getPasswordHash(argPassword.getBytes(), argSalt.getBytes(), 500_000);
 	}
-
+	
 	/**
 	 * Get private key from JKS key store file.
 	 * 
@@ -1409,7 +1447,7 @@ public class K {
 		// Return current date/time in ISO 8601 format (e.g. 2024-02-24T14:12:44.234)
 		return getTimeISO8601(Calendar.getInstance());
 	}
-	
+
 	/**
 	 * Return date and time in ISO 8601 format (Example: "2024-02-24T14:12:44.234").<br>
 	 * 
@@ -1431,7 +1469,7 @@ public class K {
 				argDateTime.get(Calendar.SECOND),
 				argDateTime.get(Calendar.MILLISECOND));
 	}
-
+	
 	/**
 	 * Return unique id (Example: 27F1E0F5-186F-48FF-BA46-10E6E4A0FAA0).
 	 * 
@@ -1522,7 +1560,7 @@ public class K {
 	 */
 	public static boolean isInteger(String argString) {
 		return isInteger(argString, Integer.MIN_VALUE, Integer.MAX_VALUE);
-	}
+	}	
 	
 	/**
 	 * Check whether the passed string contains an integer and is within the allowed range.
@@ -1563,44 +1601,27 @@ public class K {
 		} catch(Exception e){  
 		    return false;  
 		} 
-	}	
+	}
 	
 	/**
-	 * Check if a new version of the package ch.k43.util is available. The check is done by fetching https://k43.ch/java-util/version.txt and
-	 * checking the result against the active package version.
+	 * Check if a new version of the package ch.k43.util is available.
 	 * 
-	 * @return true (new version available) or false (current version up-to-date or website is not reachable).
+	 * The check is done by fetching https://github.com/AndyBrunner/Java-Utility-Package/version-check/version.txt
+	 * 
+	 * @return true (new version available) or false (current version up-to-date or web site is not reachable).
 	 * 
 	 * @since 2024.12.23
 	 */
 	public static boolean isNewVersionAvailable() {
 		
-		KLog.debug("Checking for new version of ch.k43.util package");
-		
-		KHTTPClient http = new KHTTPClient();
-		
-		if (!http.get(K.VERSION_URL)) {
-			KLog.error("Unable to read from {}: {}", K.VERSION_URL, http.getLastError());
-			return false;
-		}
-		
-		// Get current version
-		String currentVersion = http.getResponseDataAsString().trim();
+		String currentVersion = getCurrentVersionNumber();
 		
 		if (currentVersion == null) {
-			KLog.error("Unable to read from {}", K.VERSION_URL);
 			return false;
 		}
 		
-		KLog.debug("Lastest version: {}, current version: {}", currentVersion, K.VERSION);
-		
-		if (currentVersion.equalsIgnoreCase(K.VERSION)) {
-			KLog.debug("Package ch.k43.util is up-to-date");
-			return false;
-		} else {
-			KLog.debug("New version {} of package ch.k43.util is available", currentVersion.trim());
-			return true;
-		}
+		KLog.debug("Current version: {}, active version: {}", currentVersion, K.VERSION);
+		return !currentVersion.equals(K.VERSION);
 	}
 	
 	/**
