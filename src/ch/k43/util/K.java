@@ -1020,7 +1020,7 @@ public class K {
 	/**
 	 * Return the currently available version of this package.
 	 * 
-	 * The check is done by fetching https://github.com/AndyBrunner/Java-Utility-Package/version-check/version.txt
+	 * The check is done by fetching https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt
 	 * 
 	 * @return Current version number (YYYY-MM-DD) or null if web site is not reachable
 	 * 
@@ -1606,7 +1606,7 @@ public class K {
 	/**
 	 * Check if a new version of the package ch.k43.util is available.
 	 * 
-	 * The check is done by fetching https://github.com/AndyBrunner/Java-Utility-Package/version-check/version.txt
+	 * The check is done by fetching https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt
 	 * 
 	 * @return true (new version available) or false (current version up-to-date or web site is not reachable).
 	 * 
