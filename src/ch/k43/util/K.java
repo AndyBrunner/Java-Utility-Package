@@ -1,6 +1,3 @@
-/**
- * Java Utility Package
- */
 package ch.k43.util;
 
 import java.io.ByteArrayInputStream;
@@ -52,12 +49,17 @@ public class K {
 	/**
 	 * Package version number. Example: "2025.01.24".
 	 */
-	public static final		String				VERSION				= "2025.02.26";			// Also change version-check/version.txt
+	public static final		String				VERSION				= "2025.03.02";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
 	 */
 	public static final		Calendar			START_TIME			= Calendar.getInstance();
+	
+	/**
+	 * Application instance UUID. Example is "D94CF874-5159-4B1F-8381-AA22812FFEDA".
+	 */
+	public static final		String				INSTANCE_UUID		= K.getUniqueID();
 	
 	/**
 	 * Platform dependent line separator. Examples are "\r", "\n", "\r\n".
@@ -1018,9 +1020,8 @@ public class K {
 	}
 	
 	/**
-	 * Return the currently available version of this package.
-	 * 
-	 * The check is done by fetching https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt
+	 * Return the currently available version of this package. The check is done by fetching
+	 * https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt.
 	 * 
 	 * @return Current version number (YYYY-MM-DD) or null if web site is not reachable
 	 * 
@@ -1604,9 +1605,8 @@ public class K {
 	}
 	
 	/**
-	 * Check if a new version of the package ch.k43.util is available.
-	 * 
-	 * The check is done by fetching https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt
+	 * Check if a new version of the package ch.k43.util is available. The check is done by fetching
+	 * https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt.
 	 * 
 	 * @return true (new version available) or false (current version up-to-date or web site is not reachable).
 	 * 

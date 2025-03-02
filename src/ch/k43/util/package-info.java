@@ -1,5 +1,5 @@
 /**
- * Java Utility Package (Freeware)<p>
+ * <b>Java Utility Package (Freeware)</b><p>
  * 
  * A high-performance, user-friendly programming toolkit designed for Java back-end developers.<p>
  * 

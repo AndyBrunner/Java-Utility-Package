@@ -3,7 +3,7 @@ package ch.k43.util;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.util.Arrays;
+import java.util.regex.Pattern;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.logging.Handler;
@@ -47,11 +47,14 @@ import java.io.FileInputStream;
  */
 public class KLog {
 
-	protected static final String		PROPERTY_FILE			= System.getProperty("KLogPropertyFile", "KLog.properties").trim();
-	protected static final String		LOG_LEVEL_OVERRIDE		= System.getProperty("KLogLevel", "").trim().toUpperCase();
-	protected static final String		DELIMITER				= "∞∞∞";				// Used by KLog and all KLogxxxx formatter/handler classes
+	protected static final	String		PROPERTY_FILE			= System.getProperty("KLogPropertyFile", "KLog.properties").trim();
+	protected static final	String		LOG_LEVEL_OVERRIDE		= System.getProperty("KLogLevel", "").trim().toUpperCase();
+	protected static final	String		LOG_EXCLUDE				= System.getProperty("KLogExclude", "").trim();
+	protected static final	String		LOG_INCLUDE				= System.getProperty("KLogInclude", "").trim();
+	
+	protected static final	String		DELIMITER				= "∞∞∞";				// Used by KLog and all KLogxxxx formatter/handler classes
 
-	private static final String[]		EXCLUDE_CLASSES			= {
+	private static final	String[]	EXCLUDE_CLASSES			= {
 																KLogJDBCHandler.class.getName(),
 																KLogSMTPHandler.class.getName(),
 																KLogSMTPHandlerThread.class.getName(),
@@ -61,9 +64,11 @@ public class KLog {
 																KLogXMLFormatter.class.getName(),
 																KLogYAMLFormatter.class.getName(),
 																};
-	
+
 	private static Logger				gLogLogger				= null;
 	private	static Level				gLogInitLevel			= Level.OFF;
+	private static Pattern				gExcludeRegEx			= null;
+	private static Pattern				gIncludeRegEx			= null;
 	
 	//
 	// Static block to initialize class
@@ -71,9 +76,12 @@ public class KLog {
 	static {
 		
 		// Start timer for initialization
-		KTimer timer = new KTimer();
+		KTimer 	timer				= new KTimer();
+		boolean	inclExclConflict	= false;
 		
-		// Get Java logger instance
+		//
+		// Initialize Java logger instance
+		//
 		gLogLogger = Logger.getLogger(KLog.class.getName());
 		
 		// Configure logging with Klog.properties file
@@ -92,7 +100,9 @@ public class KLog {
 			gLogLogger = null;
 		}
 
+		//
 		// Check if command line parameter -JKLogLevel is overriding the logging level
+		//
 		if (!K.isEmpty(LOG_LEVEL_OVERRIDE)) {
 			
 			switch (LOG_LEVEL_OVERRIDE) {
@@ -122,8 +132,51 @@ public class KLog {
 				}
 			}
 		}
+
+		//
+		// Read and process KLog include and exclude RegEx patterns
+		//
+		if (isActive()) {
+
+			// Use overriding parameter -DKLogInclude or KLog.property "ch.k43.util.KLog.include"
+			try {
+				if (!K.isEmpty(LOG_INCLUDE)) {
+					gIncludeRegEx = Pattern.compile(LOG_INCLUDE, Pattern.CASE_INSENSITIVE);
+				} else {
+					String patternString = LogManager.getLogManager().getProperty(KLog.class.getName() + ".include");
+					if (!K.isEmpty(patternString)) {
+						gIncludeRegEx = Pattern.compile(patternString.trim(), Pattern.CASE_INSENSITIVE);						
+					}
+				}
+			} catch (Exception e) {
+				// Ignore RexEx errors
+			}
+			
+			// Use overriding parameter -DKLogExclude or KLog.property "ch.k43.util.KLog.exclude"
+			try {
+				if (!K.isEmpty(LOG_EXCLUDE)) {
+					gExcludeRegEx = Pattern.compile(LOG_EXCLUDE, Pattern.CASE_INSENSITIVE);
+				} else {
+					String patternString = LogManager.getLogManager().getProperty(KLog.class.getName() + ".exclude");
+					if (!K.isEmpty(patternString)) {
+						gExcludeRegEx = Pattern.compile(patternString.trim(), Pattern.CASE_INSENSITIVE);						
+					}
+				}
+			} catch (Exception e) {
+				// Ignore RexEx errors
+			}
+			
+			// Ignore include and exclude if both are specified
+			if ((gIncludeRegEx != null) && (gExcludeRegEx != null)) {
+				gIncludeRegEx		= null;
+				gExcludeRegEx		= null;
+				inclExclConflict	= true;
+			}
+		}
 		
+		//
 		// Log environment
+		//
 		if (isLevelDebug()) {
 		
 			debug("===== Application started {} =====", K.getTimeISO8601(K.START_TIME));
@@ -135,9 +188,21 @@ public class KLog {
 					KLog.PROPERTY_FILE);
 
 			if (!K.isEmpty(LOG_LEVEL_OVERRIDE)) {
-				debug("KLog logging level overridden to {}", LOG_LEVEL_OVERRIDE);
+				debug("KLog logging level overridden with -DKLogLevel parameter");
 			}
-
+			
+			if (!K.isEmpty(LOG_EXCLUDE)) {
+				debug("KLog logging excludes overridden with -DKLogExclude parameter");
+			}
+			
+			if (!K.isEmpty(LOG_INCLUDE)) {
+				debug("KLog logging includes overridden with -DKLogInclude parameter");
+			}
+			
+			if (inclExclConflict) {
+				debug("KLog logging includes and excludes ignored as both were specified");
+			}
+			
 			// Show network and OS
 			debug("Network host {} ({})",
 					K.getLocalHostName(),
@@ -666,19 +731,29 @@ public class KLog {
 	private static void write(Level argLevel, String argData) {
 		
 		// Check if any data to be logged
-		if (K.isEmpty(argData)) {
+		if ((argLevel == null) || K.isEmpty(argData)) {
+			return;
+		}
+	
+		// Check if log string matches specified RegEx to be excluded from log 
+		if ((gExcludeRegEx != null) && (gExcludeRegEx.matcher(argData).find())) {
 			return;
 		}
 		
-		// Get stack trace
-		String stackTrace = Arrays.toString(Thread.currentThread().getStackTrace());
-
-		// Prohibit log write recursion by excluding some Java classes
-		for (String classExclude : EXCLUDE_CLASSES) {
-			if (stackTrace.contains(classExclude)) {
-				return;
-			}
+		// Check if log string matches specified RegEx to be included in log 
+		if ((gIncludeRegEx != null) && (!gIncludeRegEx.matcher(argData).find())) {
+			return;
 		}
+		
+		// Prohibit log write recursion by excluding some Java classes
+	    StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+	    for (StackTraceElement element : stackTrace) {
+	        for (String classExclude : EXCLUDE_CLASSES) {
+	            if (element.getClassName().equals(classExclude)) {
+	                return;
+	            }
+	        }
+	    }
 
 		// Write logger message
 		gLogLogger.log(argLevel, argData);
