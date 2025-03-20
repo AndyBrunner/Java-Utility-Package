@@ -9,6 +9,7 @@ import java.util.TimeZone;
 import java.util.logging.Handler;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 /**
  * Static class for simple logging.<p>
@@ -47,12 +48,13 @@ import java.io.FileInputStream;
  */
 public class KLog {
 
-	protected static final	String		PROPERTY_FILE			= System.getProperty("KLogPropertyFile", "KLog.properties").trim();
+	protected static final	String		PROPERTY_FILE;			// Initialized in static block
+	
 	protected static final	String		LOG_LEVEL_OVERRIDE		= System.getProperty("KLogLevel", "").trim().toUpperCase();
 	protected static final	String		LOG_EXCLUDE				= System.getProperty("KLogExclude", "").trim();
 	protected static final	String		LOG_INCLUDE				= System.getProperty("KLogInclude", "").trim();
 	
-	protected static final	String		DELIMITER				= "∞∞∞";				// Used by KLog and all KLogxxxx formatter/handler classes
+	protected static final	String		LOG_DELIMITER			= "∞∞∞";				// Used by KLog and all KLogxxxx formatter/handler
 
 	private static final	String[]	EXCLUDE_CLASSES			= {
 																KLogJDBCHandler.class.getName(),
@@ -74,17 +76,21 @@ public class KLog {
 	// Static block to initialize class
 	//
 	static {
-		
-		// Start timer for initialization
-		KTimer 	timer				= new KTimer();
-		boolean	inclExclConflict	= false;
-		
+
 		//
 		// Initialize Java logger instance
 		//
+		String propertyOverride = System.getProperty("KLogPropertyFile", "").trim();
+		
+		if (!K.isEmpty(propertyOverride)) {
+			PROPERTY_FILE = propertyOverride;
+		} else {
+			PROPERTY_FILE = "KLog.properties";
+		}
+				
+		// Configure logging with Klog.properties file
 		gLogLogger = Logger.getLogger(KLog.class.getName());
 		
-		// Configure logging with Klog.properties file
 		try {
 			LogManager.getLogManager().readConfiguration(new FileInputStream(PROPERTY_FILE));
 			
@@ -96,7 +102,18 @@ public class KLog {
 				gLogInitLevel = gLogLogger.getLevel();
 			}
 		} catch (Exception e) {
-			// Mark open failed
+			
+			// Check if overridden property file could not be opened
+			if ((e instanceof FileNotFoundException) && (!K.isEmpty(propertyOverride))) {
+				throw new RuntimeException("The specified logging property file " + propertyOverride + " could not be found");
+			}
+
+			// Check if any errors except file-not-found
+			if (!(e instanceof FileNotFoundException)) {
+				throw new RuntimeException("Logging property file " + propertyOverride + " could not be read: " + e.toString());
+			}
+			
+			// Ignore errors and disable logging
 			gLogLogger = null;
 		}
 
@@ -128,7 +145,7 @@ public class KLog {
 				}
 	
 				default: {
-					// Ignoring invalid logging level
+					throw new RuntimeException("Command line parameter -DKLogLevel must be 'Info', 'Error', 'Debug' or 'Off'");
 				}
 			}
 		}
@@ -149,7 +166,7 @@ public class KLog {
 					}
 				}
 			} catch (Exception e) {
-				// Ignore RexEx errors
+				throw new RuntimeException("Invalid RegEx logging include syntax: " + e.toString());
 			}
 			
 			// Use overriding parameter -DKLogExclude or KLog.property "ch.k43.util.KLog.exclude"
@@ -163,14 +180,12 @@ public class KLog {
 					}
 				}
 			} catch (Exception e) {
-				// Ignore RexEx errors
+				throw new RuntimeException("Invalid RegEx logging exclude syntax: " + e.toString());
 			}
 			
-			// Ignore include and exclude if both are specified
+			// Check if include and exclude were given
 			if ((gIncludeRegEx != null) && (gExcludeRegEx != null)) {
-				gIncludeRegEx		= null;
-				gExcludeRegEx		= null;
-				inclExclConflict	= true;
+				throw new RuntimeException("Both logging include and exclude parameters specified");
 			}
 		}
 		
@@ -192,15 +207,11 @@ public class KLog {
 			}
 			
 			if (!K.isEmpty(LOG_EXCLUDE)) {
-				debug("KLog logging excludes overridden with -DKLogExclude parameter");
+				debug("KLog logging filter set with -DKLogExclude");
 			}
 			
 			if (!K.isEmpty(LOG_INCLUDE)) {
-				debug("KLog logging includes overridden with -DKLogInclude parameter");
-			}
-			
-			if (inclExclConflict) {
-				debug("KLog logging includes and excludes ignored as both were specified");
+				debug("KLog logging filter set with -DKLogInclude={}", LOG_INCLUDE);
 			}
 			
 			// Show network and OS
@@ -262,9 +273,6 @@ public class KLog {
 			// Temporary directory
 			debug("Temporary directory {}",
 					K.TEMP_DIRECTORY);
-			
-			// Log initialization time
-			debug("KLog initialization completed ({} ms)", timer.getElapsedMilliseconds());
 		}
 	}
 	
@@ -347,6 +355,19 @@ public class KLog {
 		IllegalArgumentException exception = new IllegalArgumentException(workString);
 		logStackTrace(exception);
 		throw exception;
+	}
+	
+	/**
+	 * Log error message and throw an unchecked exception IllegalArgumentException.<br>
+	 * 
+	 * @param	argMessage					Message to be logged and used as exception
+	 * @param	argObjects					Optional arguments for {} parameters 
+	 * @throws	IllegalArgumentException	Explicit exception
+	 * 
+	 * @since 2025.03.16
+	 */
+	public static void argException(String argMessage, Object... argObjects) {
+		argException(true, argMessage, argObjects);
 	}
 
 	/**
@@ -498,7 +519,7 @@ public class KLog {
 	private static String formatLogMessage(String argMessage) {
 
 		// Check if argument valid and code location not already prepended
-		if ((!K.isEmpty(argMessage)) && (argMessage.indexOf(KLog.DELIMITER) != -1)) {
+		if ((!K.isEmpty(argMessage)) && (argMessage.indexOf(KLog.LOG_DELIMITER) != -1)) {
 			return (argMessage);
 		}
 
@@ -523,7 +544,7 @@ public class KLog {
 		}
 		
 		// Return formatted string to caller
-	    strBuilder.append(KLog.DELIMITER)
+	    strBuilder.append(KLog.LOG_DELIMITER)
 	    	.append(argMessage != null ? argMessage : "N/A");
 	    
 	    return strBuilder.toString();

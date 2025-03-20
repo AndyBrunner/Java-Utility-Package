@@ -13,6 +13,8 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
@@ -25,6 +27,7 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -49,7 +52,7 @@ public class K {
 	/**
 	 * Package version number. Example: "2025.01.24".
 	 */
-	public static final		String				VERSION				= "2025.03.02";			// Also change docs/version-check/version.txt
+	public static final		String				VERSION				= "2025.03.20";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
@@ -173,7 +176,7 @@ public class K {
 			
 			majorVersion = Integer.parseInt(versionElements[0]);
 		    
-			// Treat Version 1.x as x (e.g. 1.8 as 8) 
+			// Treat version 1.x as x (e.g. 1.8 as 8) 
 			if (majorVersion == 1) {
 				majorVersion = Integer.parseInt(versionElements[1]);
 		    }
@@ -324,6 +327,30 @@ public class K {
 		
 		return csvString;
 	}
+	
+	/**
+	 * Return decoded HTML String
+	 * 
+	 * @param	argBuffer	String to be decoded
+	 * @return	String		Decoded string
+	 * 
+ 	 * @since 2025.03.13
+	 */
+	public static String decodeHTML(String argBuffer) {
+
+    	// Check passed parameter
+    	if (K.isEmpty(argBuffer)) {
+    		return "";
+    	}
+
+        // Replace standard named entities
+        return argBuffer
+        		.replace("&lt;", "<")
+        		.replace("&gt;", ">")
+        		.replace("&quot;", "\"")
+        		.replace("&#39;", "'")
+        		.replace("&amp;", "&");	// Must be done last
+    }
 	
 	/**
 	 * Return decoded JSON string
@@ -648,6 +675,48 @@ public class K {
     }
 	
 	/**
+	 * Encode HTML string
+	 * 
+	 * @param	argBuffer	String to be encoded
+	 * @return	String		Encoded string
+	 * 
+ 	 * @since 2025.03.13
+	 */
+	public static String encodeHTML(String argBuffer) {
+
+    	// Check passed parameter
+    	if (K.isEmpty(argBuffer)) {
+    		return "";
+    	}
+
+    	StringBuilder encodedString = new StringBuilder();
+        
+        for (char ch : argBuffer.toCharArray()) {
+            switch (ch) {
+                case '&':
+                    encodedString.append("&amp;");
+                    break;
+                case '<':
+                    encodedString.append("&lt;");
+                    break;
+                case '>':
+                    encodedString.append("&gt;");
+                    break;
+                case '"':
+                    encodedString.append("&quot;");
+                    break;
+                case '\'':
+                    encodedString.append("&#39;");
+                    break;
+                default:
+                    encodedString.append(ch);
+            }
+        }
+        
+        return encodedString.toString();
+    }
+	
+	/**
 	 * Return encoded string for JSON. The returned string is always enclosed in double quotes.
 	 * 
 	 * @param	argBuffer		String to be encoded
@@ -711,7 +780,7 @@ public class K {
 		// Return enclosed string
 		return '"' + jsonString + '"';
     }
-	
+
 	/**
 	 * Return encoded string in UTF-8
 	 * 
@@ -733,7 +802,7 @@ public class K {
         	return "";
         }
     }
-
+	
 	/**
 	 * Encode string for XML
 	 * 
@@ -965,6 +1034,31 @@ public class K {
 	}
 
 	/**
+	 * Generate RSA-4096 public/private key pair.
+	 * 
+	 * @return	KeyPair	Generated key pair
+	 */
+	public static KeyPair generateRSAKeyPair() {
+	   		
+		// Generate key pair
+		try {
+			KTimer timer = new KTimer();
+			
+			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+			keyPairGenerator.initialize(4096);
+			
+			KeyPair keyPair = keyPairGenerator.generateKeyPair();
+			KLog.debug("RSA-4096 key pair generated ({} ms)", timer.getElapsedMilliseconds());
+			
+			return keyPair;
+			
+		} catch (Exception e) {
+			KLog.error("Unable to generate RSA-4096 key pair: {}", e.toString());
+			return null;
+		}
+	}
+	
+	/**
 	 * Get certificate from JKS keystore file.
 	 * 
 	 * @param argFileName		JKS file name
@@ -981,15 +1075,16 @@ public class K {
 		KLog.argException(K.isEmpty(argFileName), "K.getCertificate(): argFileName is required");
 		KLog.argException(K.isEmpty(argKey), "K.getCertificate(): argKey is required");
 		
-        try (FileInputStream fis = new FileInputStream(argFileName)) {
-        	
-            // Load JKS keyStore file
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(fis, argFilePassword);
+        try {
+        	// Load Java KeyStore File (JKS)
+        	KeyStore keyStore = K.loadKeyStore(argFileName, argFilePassword);
+
+        	if (keyStore == null) {
+        		return null;
+        	}
             
             // Get certificate
             Certificate certificate = keyStore.getCertificate(argKey);
-            
             if (certificate == null) {
             	KLog.error("Certificate {} not found in keyfile {}", argKey, argFileName);
             	return null;
@@ -1116,7 +1211,7 @@ public class K {
 	public static String getJVMName() {
 		return JVM_VERSION_NAME;
 	}
-	
+		
 	/**
 	 * Return JVM platform (Example: "Mac OS X (Version 14.5/aarch64)").
 	 * 
@@ -1128,7 +1223,7 @@ public class K {
 	public static String getJVMPlatform() {
 		return JVM_PLATFORM;
 	}
-		
+	
 	/**
 	 * Return JVM major version (Example: 1.9.x as 9, 12.4 as 12).
 	 * 
@@ -1248,7 +1343,7 @@ public class K {
 			return "";
 		}
 	}
-	
+
 	/**
 	 * Generate hash from password with salt. The hashing is repeated for the number of iterations with SHA3-512(password + salt).
 	 *
@@ -1266,9 +1361,9 @@ public class K {
 		KTimer timer = new KTimer();
 		
 		// Check arguments
-		KLog.abort(K.isEmpty(argPassword), "K.getPasswordHash(): argPassword is required");
-		KLog.abort(K.isEmpty(argSalt), "K.getPasswordHash(): argSalt is required");
-		KLog.abort(argIteration < 1, "K.getPasswordHash(): argIteration must be a positive integer");
+		KLog.argException(K.isEmpty(argPassword), "K.getPasswordHash(): argPassword is required");
+		KLog.argException(K.isEmpty(argSalt), "K.getPasswordHash(): argSalt is required");
+		KLog.argException(argIteration < 1, "K.getPasswordHash(): argIteration must be a positive integer");
 		
 		// Append salt to password
 		byte[] passwordHash = new byte[argPassword.length + argSalt.length];
@@ -1291,7 +1386,7 @@ public class K {
 		KLog.debug("Password hash completed ({} iterations, {} ms)", argIteration, timer.getElapsedMilliseconds());
 		return passwordHash;
 	}
-
+	
 	/**
 	 * Generate hash from password with salt. The hashing is repeated 500'000 times with SHA3-512(password + salt).
 	 *
@@ -1305,8 +1400,8 @@ public class K {
 	public static byte[] getPasswordHash(String argPassword, String argSalt) {
 		
 		// Check arguments
-		KLog.abort(K.isEmpty(argPassword), "K.getPasswordHash(): argPassword is required");
-		KLog.abort(K.isEmpty(argSalt), "K.getPasswordHash(): argSalt is required");
+		KLog.argException(K.isEmpty(argPassword), "K.getPasswordHash(): argPassword is required");
+		KLog.argException(K.isEmpty(argSalt), "K.getPasswordHash(): argSalt is required");
 		
 		return getPasswordHash(argPassword.getBytes(), argSalt.getBytes(), 500_000);
 	}
@@ -1331,9 +1426,12 @@ public class K {
 		
         try (FileInputStream fis = new FileInputStream(argFileName)) {
         	
-            // Load JKS keyStore file
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            keyStore.load(fis, argFilePassword);
+        	// Load Java KeyStore File (JKS) 
+        	KeyStore keyStore = K.loadKeyStore(argFileName, argFilePassword);
+ 
+        	if (keyStore == null) {
+        		return null;
+        	}
             
             // Return private key
             Key key = keyStore.getKey(argKey, argKeyPassword);
@@ -1702,6 +1800,32 @@ public class K {
 	}
 	
 	/**
+	 * Load Java KeyStore file.
+	 * 
+	 * @param argFileName	Java KeyStore file name (JKS)
+	 * @param argPassword	KeyStore file password
+	 * 
+	 * @return KeyStore or null for errors
+	 * 
+	 * @since 2025.03.17
+	 */
+	public static KeyStore loadKeyStore(String argFileName, char[] argPassword) {
+		
+	    KLog.debug("Loading Java KeyStore File {}", argFileName);
+		
+	    try (FileInputStream fis = new FileInputStream(argFileName)) {
+
+	    	KeyStore keyStore = KeyStore.getInstance("JKS");
+	        keyStore.load(fis, argPassword);
+	        return keyStore;
+	        
+		} catch (Exception e) {
+			KLog.error("Unable to load Java KeyStore File {}: {}", argFileName, e.toString());
+			return null;
+		}
+	}
+	
+	/**
 	 * Return DNS records for the specified record type.<br>
 	 * 
 	 * @param argDNSRecordType	DNS record type (MX, A, etc.)
@@ -2025,7 +2149,7 @@ public class K {
 		StringBuilder stringBuilder = new StringBuilder();
 		
 		for (byte singleByte : argBytes) {
-			stringBuilder.append(String.format("%02x", singleByte));
+			stringBuilder.append(String.format("%02X", singleByte));
 		}
 		
 		return stringBuilder.toString();
@@ -2047,6 +2171,118 @@ public class K {
 		}
 		
 		return toHex(argString.getBytes());
+	}
+	
+	/**
+	 * Return PEM formatted string from the passed object. Supported objects are PrivateKey, PublicKey, Certificate, KeyPair and KeyStore. 
+	 * 
+	 * @param 	argObject Object to be formatted
+	 * @return	Formatted PEM string or empty string for errors
+	 * 
+	 * @since 2025.03.16
+	 */
+	public static String toPEM(Object argObject) {
+		return toPEM(argObject, null);
+	}
+	
+	/**
+	 * Return PEM formatted string from the passed object. Supported objects are PrivateKey, PublicKey, Certificate, KeyPair and KeyStore.  
+	 * 
+	 * @param 	argObject Object to be formatted
+	 * @param	argPassword	Password for protected objects or null
+	 * @return	Formatted PEM string or empty string for errors
+	 * 
+	 * @since 2025.03.16
+	 */
+	public static String toPEM(Object argObject, char[] argPassword) {
+		
+		// Check argument
+		KLog.argException(argObject == null, "toPEM(): argObject is required");
+		
+		String	pemLabel	= null;
+		byte[]	pemEncoded	= null;
+		
+		// Initialize variables according to passed object type
+		try {
+
+			// Private Key
+	        if (argObject instanceof PrivateKey) {
+	            pemLabel = "PRIVATE KEY";
+	            pemEncoded = ((PrivateKey) argObject).getEncoded();
+	        }
+	        
+	        // Public Key
+	        if (argObject instanceof PublicKey) {
+	            pemLabel = "PUBLIC KEY";
+	            pemEncoded = ((PublicKey) argObject).getEncoded();
+	        }
+	        
+	        // Certificate
+	        if (argObject instanceof Certificate) {
+	            pemLabel = "CERTIFICATE";
+	            pemEncoded = ((Certificate) argObject).getEncoded();
+	        }
+	        
+	        // Private and Public Key
+	        if (argObject instanceof KeyPair) {
+	        	PublicKey 	publicKey 	= ((KeyPair) argObject).getPublic();
+	        	PrivateKey	privateKey	= ((KeyPair) argObject).getPrivate();
+	        	return toPEM(privateKey, argPassword) + toPEM(publicKey, argPassword);
+	        }
+	        
+	        // KeyFile
+	        if (argObject instanceof KeyStore) {
+	        	
+	        	StringBuilder pemString = new StringBuilder();
+	        	
+	        	// Loop thru all aliases
+	        	KeyStore			keyStore	= (KeyStore) argObject;
+	        	Enumeration<String>	aliases		= keyStore.aliases();
+	        	
+	            while (aliases.hasMoreElements()) {
+	                
+	            	String alias = aliases.nextElement();
+
+	            	// Private key entry
+	                if (keyStore.isKeyEntry(alias)) {
+	                	Key key = keyStore.getKey(alias, argPassword);
+	                	if (key instanceof PrivateKey) {
+	                	    pemString.append(K.toPEM(key, argPassword));
+	                	}
+	                }
+	                
+	                // Certificate key entry
+	                if (keyStore.isCertificateEntry(alias)) {
+	                	pemString.append(K.toPEM(keyStore.getCertificate(alias), argPassword));
+	                }
+	            }
+	        	
+	        	return pemString.toString();
+	        }
+	        
+	        if (pemLabel == null) {
+	            KLog.argException("K.toPEM(): Unsupported object type {}", argObject.getClass().getName());
+	            return "";
+	        }
+		
+		} catch (Exception e) {
+			KLog.error("Unable to encode PEM from object type {}: {}", argObject.getClass().getName(), e.toString());
+			return "";
+		}
+				
+	    // Base64 encoding and formatting (lines with maximum of 64 characters)
+	    String encodedString = K.encodeBase64(pemEncoded);
+	    String formattedBase64 = String.join("\n", encodedString.split("(?<=\\G.{64})"));
+
+	    // Construct PEM string
+	    StringBuilder pemString = new StringBuilder()
+	        .append("-----BEGIN ").append(pemLabel).append("-----\n")
+	        .append(formattedBase64).append("\n")
+	        .append("-----END ").append(pemLabel).append("-----\n");
+	    
+	    KLog.debug("PEM output for type {} created", pemLabel);
+	    
+	    return pemString.toString();
 	}
 	
 	/**

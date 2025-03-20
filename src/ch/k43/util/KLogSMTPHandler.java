@@ -199,7 +199,7 @@ public class KLogSMTPHandler extends Handler {
 		// Get the passed message and split it into code location and text (delimited by KLOG.DELIMITER)
 		String	traceLocation	= null;
 		String	traceMessage	= argRecord.getMessage();
-		int		posDelimiter	= traceMessage.indexOf(KLog.DELIMITER);
+		int		posDelimiter	= traceMessage.indexOf(KLog.LOG_DELIMITER);
 		
 		if (posDelimiter != -1) {
 			traceLocation		= traceMessage.substring(0, posDelimiter);

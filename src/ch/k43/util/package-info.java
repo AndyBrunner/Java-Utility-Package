@@ -6,7 +6,7 @@
  * This package holds all classes used by the Java Utility Package. The full documentation with examples can be found on <a href="https://java-util.k43.ch">java-util.k43.ch</a>
  * 
  * <pre>
- * // JDBC Example
+ * <b>JDBC Example</b>
  * try (KDB db = new KDB(KDB.JDBC_H2, "jdbc:h2:mem:mydb", "", "")) {
  *
  *    KLog.abort(!db.isConnected(), "Error: {}", db.getErrorMessage());
@@ -20,7 +20,7 @@
  *    System.out.println(db.getDataAsJSON());
  * }
  * 
- * // HTTPS Example
+ * <b>HTTPS Example</b>
  * KHTTPClient http = new KHTTPClient();
  * 
  * if (!http.get("https://reqbin.com/echo/get/json")) {
@@ -29,7 +29,7 @@
  *    System.out.println(http.getResponseDataAsString());
  * }
  * 
- * // SMTP Example
+ * <b>SMTP Example</b>
  * KSMTPMailer mailer = new KSMTPMailer();
  *
  * mailer.setFrom("john.doe@acme.com");
