@@ -1,5 +1,5 @@
 /**
- * <b>Java Utility Package (Freeware)</b><p>
+ * <b>Java Utility Package (Open Source)</b><p>
  * 
  * A high-performance, user-friendly programming toolkit designed for Java back-end developers.<p>
  * 
@@ -12,10 +12,12 @@
  *    KLog.abort(!db.isConnected(), "Error: {}", db.getErrorMessage());
  *		
  *    db.exec("CREATE TABLE addresses (sequence INT AUTO_INCREMENT, lastname VARCHAR(20), firstname VARCHAR(20))");
+ *    
  *    db.prepare("INSERT INTO addresses (lastname, firstname) VALUES (?, ?)");
  *    db.execPrepare("Smith", "Joe");
  *    db.execPrepare("Miller", "Bob");
  *    db.execPrepare("Johnson", "Evelyn");
+ *    
  *    db.exec("SELECT * FROM addresses");
  *    System.out.println(db.getDataAsJSON());
  * }

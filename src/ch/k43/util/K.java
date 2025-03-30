@@ -21,6 +21,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -50,9 +51,9 @@ public class K {
 	//
 	
 	/**
-	 * Package version number. Example: "2025.01.24".
+	 * Package version number. Example is "2025.01.24".
 	 */
-	public static final		String				VERSION				= "2025.03.20";			// Also change docs/version-check/version.txt
+	public static final		String				VERSION				= "2025.03.30";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
@@ -80,7 +81,7 @@ public class K {
 	public static final 	String				PATH_SEPARATOR		= File.pathSeparator;
 	
 	/**
-	 * User name. Example are "joesmith", "bob".
+	 * User name. Examples are "joesmith", "bob".
 	 */
 	public static final 	String				USER_NAME			= System.getProperty("user.name", "n/a").trim();
 	
@@ -105,7 +106,7 @@ public class K {
 	public static final 	String				USER_LANGUAGE		= System.getProperty("user.language", "en").trim();
 	
 	/**
-	 * Default encoding. Example: "UTF-8".
+	 * Default encoding. Example is "UTF-8".
 	 */
 	public static final 	String				DEFAULT_ENCODING	= System.getProperty("native.encoding", "UTF-8").trim();
 	
@@ -2182,7 +2183,20 @@ public class K {
 	 * @since 2025.03.16
 	 */
 	public static String toPEM(Object argObject) {
-		return toPEM(argObject, null);
+		return toPEM(argObject, null, false);
+	}
+	
+	/**
+	 * Return PEM formatted string from the passed object. Supported objects are PrivateKey, PublicKey, Certificate, KeyPair and KeyStore. 
+	 * 
+	 * @param 	argObject Object to be formatted
+	 * @param	argComments	Add description to PEM
+	 * @return	Formatted PEM string or empty string for errors
+	 * 
+	 * @since 2025.03.22
+	 */
+	public static String toPEM(Object argObject, boolean argComments) {
+		return toPEM(argObject, null, argComments);
 	}
 	
 	/**
@@ -2195,45 +2209,130 @@ public class K {
 	 * @since 2025.03.16
 	 */
 	public static String toPEM(Object argObject, char[] argPassword) {
+		return toPEM(argObject, argPassword, false);
+	}
+	
+	/**
+	 * Return PEM formatted string from the passed object. Supported objects are PrivateKey, PublicKey, Certificate, KeyPair and KeyStore.  
+	 * 
+	 * @param 	argObject Object to be formatted
+	 * @param	argPassword	Password for protected objects or null
+	 * @param	argComments	Add description to PEM
+	 * @return	Formatted PEM string or empty string for errors
+	 * 
+	 * @since 2025.03.22
+	 */
+	@SuppressWarnings({ "deprecation"})
+	public static String toPEM(Object argObject, char[] argPassword, boolean argComments) {
 		
 		// Check argument
 		KLog.argException(argObject == null, "toPEM(): argObject is required");
 		
-		String	pemLabel	= null;
-		byte[]	pemEncoded	= null;
+    	StringBuilder	pemString		= new StringBuilder();
+		String			generatorString	= "# PEM-Created: " + K.getTimeISO8601() + " (" + K.class.getName() + '/' + K.VERSION + ")\n";
+		String			pemLabel		= null;
+		String			pemDescription	= "n/a";
+		byte[]			pemEncoded		= null;
 		
-		// Initialize variables according to passed object type
+		// Format PEM according to passed object type
 		try {
-
+			//
 			// Private Key
+			//
 	        if (argObject instanceof PrivateKey) {
-	            pemLabel = "PRIVATE KEY";
-	            pemEncoded = ((PrivateKey) argObject).getEncoded();
-	        }
-	        
-	        // Public Key
-	        if (argObject instanceof PublicKey) {
-	            pemLabel = "PUBLIC KEY";
-	            pemEncoded = ((PublicKey) argObject).getEncoded();
-	        }
-	        
-	        // Certificate
-	        if (argObject instanceof Certificate) {
-	            pemLabel = "CERTIFICATE";
-	            pemEncoded = ((Certificate) argObject).getEncoded();
-	        }
-	        
-	        // Private and Public Key
-	        if (argObject instanceof KeyPair) {
-	        	PublicKey 	publicKey 	= ((KeyPair) argObject).getPublic();
-	        	PrivateKey	privateKey	= ((KeyPair) argObject).getPrivate();
-	        	return toPEM(privateKey, argPassword) + toPEM(publicKey, argPassword);
-	        }
-	        
-	        // KeyFile
-	        if (argObject instanceof KeyStore) {
 	        	
-	        	StringBuilder pemString = new StringBuilder();
+	        	PrivateKey privateKey = (PrivateKey) argObject;
+	        	
+	            pemLabel		= "Private key";
+	            pemDescription	= privateKey.getAlgorithm() + "-Algorithm";
+	            pemEncoded		= privateKey.getEncoded();
+	            
+	            if (argComments) {
+		        	pemString.append("# Private-Key: ").append(pemDescription).append('\n');
+	        	   	pemString.append(generatorString);
+	            }
+	        //
+	        // Public Key
+	        //
+			} else if (argObject instanceof PublicKey) {
+	        	
+	        	PublicKey publicKey = (PublicKey) argObject;
+
+	            pemLabel		= "Public key";
+	            pemDescription	= publicKey.getAlgorithm() + "-Algorithm";
+	            pemEncoded		= publicKey.getEncoded();
+
+	            if (argComments) {
+		        	pemString.append("# Public-Key: ").append(pemDescription).append('\n');
+		        	pemString.append(generatorString);
+	            }
+	        //
+	        // Certificate
+	        //
+			} else if (argObject instanceof Certificate) {
+	        	
+	        	Certificate certificate = (Certificate) argObject;
+	        	pemLabel		= "Certificate";
+	            pemEncoded		= certificate.getEncoded();
+
+	            if (argObject instanceof X509Certificate) {
+	            	
+	            	// Format certificate details
+	            	X509Certificate x509Certificate = (X509Certificate) argObject;
+	            	pemDescription = x509Certificate.getSubjectDN().toString();
+	            	
+	            	if (argComments) {
+
+			        	pemString.append("# Certificate: ").append(pemDescription).append('\n');
+			        	pemString.append("# Issued-By: ").append(x509Certificate.getIssuerDN()).append('\n');		        	
+
+			        	// Is Root CA?
+			        	boolean rootCA = (x509Certificate.getBasicConstraints() != -1);
+			        	
+			        	// Is Self-signed?
+			        	boolean selfSigned = x509Certificate.getSubjectDN().toString().equals(x509Certificate.getIssuerDN().toString());
+			        	
+			        	pemString.append("# Type: ");
+			        	if (rootCA && selfSigned) {
+			        		pemString.append("Self-Signed Root");
+			        	}
+			        	if (rootCA && !selfSigned) {
+			        		pemString.append("Intermediate");
+			        	}
+			        	if (!rootCA) {
+			        		pemString.append("Leaf");
+			        	}
+			        	pemString.append(" Certificate\n");
+			        	
+			        	pemString.append("# Algorithm: ").append(x509Certificate.getSigAlgName()).append('\n');
+			        	pemString.append("# Serial-Number: ").append(x509Certificate.getSerialNumber()).append('\n');
+			        	
+			        	// Format dates as ISO 8601
+			        	Calendar fromDate = Calendar.getInstance();
+			        	fromDate.setTime(x509Certificate.getNotBefore());
+			        	Calendar toDate = Calendar.getInstance();
+			        	toDate.setTime(x509Certificate.getNotAfter());
+			        	pemString.append("# Valid: ").append(K.getTimeISO8601(fromDate)).append(" - ").append(K.getTimeISO8601(toDate)).append('\n');
+			        	pemString.append(generatorString);
+	            	}
+	            }
+	        //
+	        // Private and Public Key pair
+	        //
+			} else if (argObject instanceof KeyPair) {
+
+	        	// Format private and public keys
+	        	PrivateKey privateKey = ((KeyPair) argObject).getPrivate();
+	        	pemString.append(toPEM(privateKey, argPassword, argComments));
+
+	        	PublicKey publicKey = ((KeyPair) argObject).getPublic();
+	        	pemString.append(toPEM(publicKey, argPassword, argComments));
+	        	
+	        	return pemString.toString();
+	        //
+	        // KeyFile
+	        //
+			} else if (argObject instanceof KeyStore) {
 	        	
 	        	// Loop thru all aliases
 	        	KeyStore			keyStore	= (KeyStore) argObject;
@@ -2246,21 +2345,29 @@ public class K {
 	            	// Private key entry
 	                if (keyStore.isKeyEntry(alias)) {
 	                	Key key = keyStore.getKey(alias, argPassword);
+
+	                	// Private key
 	                	if (key instanceof PrivateKey) {
-	                	    pemString.append(K.toPEM(key, argPassword));
+	                	    pemString.append(K.toPEM(key, argPassword, argComments));
+	                	    
+	                	    // Certificates
+	                        Certificate[] certChain = keyStore.getCertificateChain(alias);
+	                        if (certChain != null) {
+	                            for (Certificate cert : certChain) {
+	    	                	    pemString.append(K.toPEM(cert, argPassword, argComments));
+	                            }
+	                        }
 	                	}
 	                }
-	                
+
 	                // Certificate key entry
 	                if (keyStore.isCertificateEntry(alias)) {
-	                	pemString.append(K.toPEM(keyStore.getCertificate(alias), argPassword));
+	                	pemString.append(K.toPEM(keyStore.getCertificate(alias), argPassword, argComments));
 	                }
 	            }
 	        	
 	        	return pemString.toString();
-	        }
-	        
-	        if (pemLabel == null) {
+	        } else {
 	            KLog.argException("K.toPEM(): Unsupported object type {}", argObject.getClass().getName());
 	            return "";
 	        }
@@ -2270,17 +2377,16 @@ public class K {
 			return "";
 		}
 				
-	    // Base64 encoding and formatting (lines with maximum of 64 characters)
+	    // Base64 encode and format lines with maximum of 64 characters
 	    String encodedString = K.encodeBase64(pemEncoded);
 	    String formattedBase64 = String.join("\n", encodedString.split("(?<=\\G.{64})"));
 
 	    // Construct PEM string
-	    StringBuilder pemString = new StringBuilder()
-	        .append("-----BEGIN ").append(pemLabel).append("-----\n")
+	    pemString.append("-----BEGIN ").append(pemLabel.toUpperCase()).append("-----\n")
 	        .append(formattedBase64).append("\n")
-	        .append("-----END ").append(pemLabel).append("-----\n");
+	        .append("-----END ").append(pemLabel.toUpperCase()).append("-----\n");
 	    
-	    KLog.debug("PEM output for type {} created", pemLabel);
+	    KLog.debug("{} formatted: {}", pemLabel, pemDescription);
 	    
 	    return pemString.toString();
 	}

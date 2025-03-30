@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
@@ -96,10 +95,11 @@ public class KSocketClient implements AutoCloseable{
 					//
 					// TLS socket connection with client authentication
 					//
-					keyStore = KeyStore.getInstance("JKS");
+					keyStore = K.loadKeyStore(argKeyStoreFileName, argKeyStorePassword);
 
-					KLog.debug("Loading key store file {}", argKeyStoreFileName);
-					keyStore.load(new FileInputStream(argKeyStoreFileName), argKeyStorePassword);
+					if (keyStore == null) {
+						throw new Exception(K.getLastError());
+					}
 					
 					logKeyStore(keyStore);
 					

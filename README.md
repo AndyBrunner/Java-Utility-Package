@@ -1,4 +1,4 @@
-# Java Utility Package (Freeware)
+# Java Utility Package (Open Source)
 
 ## A high-performance and user-friendly programming toolkit tailored for Java back-end developers
 

@@ -170,12 +170,14 @@ public class KSocketServer implements AutoCloseable{
 				//
 				// TLS socket server
 				//
-				KLog.debug("Loading key store file {}", argKeyStoreFileName);
-				KeyStore keyStore = KeyStore.getInstance("JKS");
-				keyStore.load(new FileInputStream(argKeyStoreFileName), argKeyStorePassword);
+				KeyStore keyStore = K.loadKeyStore(argKeyStoreFileName, argKeyStorePassword);
 
+				if (keyStore == null) {
+					throw new Exception(K.getLastError());
+				}
+				
 				logKeyStore(keyStore);
-	
+				
 				// Set key store from JKS file
 				KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, argKeyStorePassword);
