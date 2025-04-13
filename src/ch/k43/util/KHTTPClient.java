@@ -373,14 +373,13 @@ public class KHTTPClient {
 			}
 		    			
 			// Set and log HTTP headers 
-			@SuppressWarnings("unchecked")
-			Enumeration<String> properties = (Enumeration<String>) httpHeaders.propertyNames();
+			Enumeration<?> properties = httpHeaders.propertyNames();
 
 			String propertyKey		= null;
 			String propertyValue	= null;
 			
 		    while (properties.hasMoreElements()) {
-		      propertyKey = properties.nextElement();
+		      propertyKey = (String) properties.nextElement();
 		      propertyValue = httpHeaders.getProperty(propertyKey);
 		      connection.setRequestProperty(propertyKey, propertyValue);
 		      KLog.debug("HTTP request header: {}: {}", propertyKey, propertyValue);

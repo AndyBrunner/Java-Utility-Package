@@ -27,9 +27,9 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -53,7 +53,7 @@ public class K {
 	/**
 	 * Package version number. Example is "2025.01.24".
 	 */
-	public static final		String				VERSION				= "2025.03.30";			// Also change docs/version-check/version.txt
+	public static final		String				VERSION				= "2025.04.13";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
@@ -135,10 +135,50 @@ public class K {
 	 */
 	public static final		int					MAX_SAVED_ERRORS	= 10;
 	
+	/**
+	 * Value of KiB
+	 */
+	public static final 	double				SIZE_KIB			= 1_024d;
+
+	/**
+	 * Value of MiB
+	 */
+	public static final 	double				SIZE_MIB			= SIZE_KIB * 1_024d;
+	
+	/**
+	 * Value of GiB
+	 */
+	public static final 	double				SIZE_GIB			= SIZE_MIB * 1_024d;
+	
+	/**
+	 * Value of TiB
+	 */
+	public static final 	double				SIZE_TIB 			= SIZE_GIB * 1_024d;
+	
+	/**
+	 * Value of PiB
+	 */
+	public static final		double				SIZE_PIB 			= SIZE_TIB * 1_024d;
+	
+	/**
+	 * Value of EiB
+	 */
+	public static final 	double				SIZE_EIB 			= SIZE_PIB * 1_024d;
+	
+	/**
+	 * Value of ZiB
+	 */
+	public static final 	double				SIZE_ZIB 			= SIZE_EIB * 1_024d;
+	
+	/**
+	 * Value of YiB
+	 */
+	public static final 	double				SIZE_YIB 			= SIZE_ZIB * 1_024d;
+	
 	//
 	// Private class variables
 	//
-	private static HashMap<Thread, KLocalData>	gLocalData			= new HashMap<>(1);		
+	private static ConcurrentHashMap<Thread, KLocalData>	gLocalData			= new ConcurrentHashMap<>(1);		
 
 	//
 	// Private class constants
@@ -148,16 +188,6 @@ public class K {
 	private static final 	String				VERSION_URL			= "https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt";	
 	private static final 	String				AES_256_CIPHER		= "AES/CBC/PKCS5Padding";
 	private static final 	String				SHA_256				= "SHA-256";
-	
-	private static final 	double				SIZE_KIB			= 1_024d;
-	private static final 	double				SIZE_MIB			= SIZE_KIB * 1_024d;
-	private static final 	double				SIZE_GIB			= SIZE_MIB * 1_024d;
-	private static final 	double				SIZE_TIB 			= SIZE_GIB * 1_024d;
-	private static final	double				SIZE_PIB 			= SIZE_TIB * 1_024d;
-	private static final 	double				SIZE_EIB 			= SIZE_PIB * 1_024d;
-	private static final 	double				SIZE_ZIB 			= SIZE_EIB * 1_024d;
-	private static final 	double				SIZE_YIB 			= SIZE_ZIB * 1_024d;
-
 	private static final	int					FILE_IO_BUFFER_SIZE	= 4_096;
 
 	//
@@ -1147,6 +1177,96 @@ public class K {
 	}
 	
 	/**
+	 * Return status text for given HTTP status code.
+	 * 
+	 * @param	argStatusCode	HTTP status code
+	 * @return	Status message
+	 * 
+	 * @since 2025.04.07
+	 */
+	public static String getHTTPStatusText(int argStatusCode) {
+		
+		switch (argStatusCode) {
+
+			// Information
+    		case 100: return "Continue";
+    		case 101: return "Switching Protocols";
+    		case 102: return "Processing";
+    		case 103: return "Early Hints";
+    		
+    		// Success
+    		case 200: return "OK";
+    		case 201: return "Created";
+    		case 202: return "Accepted";
+    		case 203: return "Non-Authoritative Information";
+    		case 204: return "No Content";
+    		case 205: return "Reset Content";
+    		case 206: return "Partial Content";
+    		case 207: return "Multi-Status";
+    		case 208: return "Already Reported";
+    		case 209: return "IM Used";
+    		
+    		// Redirect
+    		case 300: return "Multiple Choices";
+    		case 301: return "Moved Permanently";
+    		case 302: return "Found (Moved Temporarily)";
+    		case 303: return "See Other";
+    		case 304: return "Not Modified";
+    		case 305: return "Use Proxy";
+    		case 306: return "(reserved)";
+    		case 307: return "Temporary Redirect";
+    		case 308: return "Permanent Redirect";
+    		
+    		// Client Error
+    		case 400: return "Bad Request";
+    		case 401: return "Unauthorized";
+    		case 402: return "Payment Required";
+    		case 403: return "Forbidden";
+    		case 404: return "Not Found";
+    		case 405: return "Method Not Allowed";
+    		case 407: return "Proxy Authentication Required";
+    		case 408: return "Request Timeout";
+    		case 409: return "Conflict";
+    		case 410: return "Gone";
+    		case 411: return "Length Required";
+    		case 412: return "Precondition Failed";
+    		case 413: return "Payload Too Large";
+    		case 414: return "URI Too Long";
+    		case 415: return "Unsupported Media Type";
+    		case 416: return "Range Not Satisfiable";
+    		case 417: return "Expectation Failed";
+    		case 421: return "Misdirected Request";
+    		case 422: return "Unprocessable Entity";
+    		case 423: return "Locked";
+    		case 424: return "Failed Dependency";
+    		case 425: return "Too Early";
+    		case 426: return "Upgrade Required";
+    		case 428: return "Precondition Required";
+    		case 429: return "Too Many Requests";
+    		case 431: return "Request Header Fields Too Large";
+    		case 451: return "Unavailable For Legal Reasons";
+    		
+    		
+    		// Server Error
+    		case 500: return "Internal Server Error";
+    		case 501: return "Not Implemented";
+    		case 502: return "Bad Gateway";
+    		case 503: return "Service Unavailable";
+    		case 504: return "Gateway Timeout";
+    		case 505: return "HTTP Version not supported";
+    		case 506: return "Variant Also Negotiates";
+    		case 507: return "Insufficient Storage";
+    		case 508: return "Loop Detected";
+    		case 509: return "Bandwidth Limit Exceeded";
+    		case 510: return "Not Extended";
+    		case 511: return "Network Authentication Required";
+    		
+    		// Unknown
+    		default:  return "Unknown Status Code";
+		}
+	}
+	
+	/**
 	 * Return IP address of hostname
 	 * 
 	 * @param	argHostname	Hostname
@@ -1287,32 +1407,29 @@ public class K {
 	 * 
 	 * @since 2025.02.03
 	 */
-	static KLocalData getLocalData() {
+	static synchronized KLocalData getLocalData() {
 		
-		synchronized (gLocalData) {
-
-			// Remove local data objects if owning thread is no longer active
-			for (Map.Entry<Thread, KLocalData> entry : gLocalData.entrySet()) {
+		// Remove local data objects if owning thread is no longer active
+		for (Map.Entry<Thread, KLocalData> entry : gLocalData.entrySet()) {
 				
-			    Thread thread = entry.getKey();
+		    Thread thread = entry.getKey();
 
-			    if (!thread.isAlive()) {
-					KLog.debug("Local data of thread {} removed", entry.getValue().threadName);
-					gLocalData.remove(thread);
-				}
-			} 
-			
-			KLocalData localData = gLocalData.get(Thread.currentThread());
-			
-			// Create local data object if it does not exist
-			if (localData == null) {
-				localData = new KLocalData(Thread.currentThread().getName());
-				gLocalData.put(Thread.currentThread(), localData);
-				KLog.debug("Local data of thread {} created", localData.threadName);
+		    if (!thread.isAlive()) {
+				KLog.debug("Local data of thread {} removed", entry.getValue().threadName);
+				gLocalData.remove(thread);
 			}
-
-			return localData;
+		} 
+			
+		KLocalData localData = gLocalData.get(Thread.currentThread());
+			
+		// Create local data object if it does not exist
+		if (localData == null) {
+			localData = new KLocalData(Thread.currentThread().getName());
+			gLocalData.put(Thread.currentThread(), localData);
+			KLog.debug("Local data of thread {} created", localData.threadName);
 		}
+
+		return localData;
 	}
 	
 	/**
@@ -1924,7 +2041,11 @@ public class K {
 	public static String replaceParams(String argData, Object... argObjects) {
 		
 		// Check if nothing to do
-		if ((K.isEmpty(argData)) || (argObjects.length == 0)) {
+		if (K.isEmpty(argData)) {
+			return "";
+		}
+		
+		if (argObjects.length == 0) {
 			return argData;
 		}
 		
@@ -2014,24 +2135,21 @@ public class K {
 	 * 
 	 * @since 2025.02.02
 	 */
-	public static void saveError(String argMessage) {
+	public static synchronized void saveError(String argMessage) {
 		
 		// Ignore empty message
 		if (K.isEmpty(argMessage)) {
 			return;
 		}
 		
-		synchronized (gLocalData) {
+		KLocalData localData = K.getLocalData();
 			
-			KLocalData localData = K.getLocalData();
-			
-			// Delete oldest error message if maximum number of errors reached
-			if (localData.kLastErrors.size() == MAX_SAVED_ERRORS) {
-				localData.kLastErrors.removeLast();
-			}
-			
-			localData.kLastErrors.add(0, argMessage);
+		// Delete oldest error message if maximum number of errors reached
+		if (localData.kLastErrors.size() == MAX_SAVED_ERRORS) {
+			localData.kLastErrors.removeLast();
 		}
+			
+		localData.kLastErrors.add(0, argMessage);
 	}
 	
 	/**

@@ -509,7 +509,25 @@ public class KLog {
 	 * @param	argObjects		Optional arguments for {} parameters
 	 */
 	public static void error(String argMessage, Object... argObjects) {
-		error(true, K.replaceParams(argMessage, argObjects));
+
+		// Check if expression is true and message present
+		if (K.isEmpty(argMessage)) {
+			return;
+		}
+		
+		// Replace {} parameters if present
+		String workString = K.replaceParams(argMessage, argObjects);
+		
+		// Save error message even if logging is not active
+		K.saveError(workString);
+		
+		// Check if logging is active
+		if (!isActive()) {
+			return;
+		}
+		
+		// Write log message
+		write(Level.SEVERE, formatLogMessage(workString));
 	}
 	
 	/**

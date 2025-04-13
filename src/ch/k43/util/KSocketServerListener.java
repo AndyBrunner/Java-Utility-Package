@@ -18,7 +18,7 @@ import javax.net.ssl.SSLServerSocket;
  * 
  * @see KSocketServerThread
  */
-class KSocketServerListener extends Thread implements AutoCloseable{
+class KSocketServerListener extends Thread implements AutoCloseable {
 
 	// Class variables
 	private Vector<Socket>	gClientSockets			= null;
@@ -75,10 +75,12 @@ class KSocketServerListener extends Thread implements AutoCloseable{
 		}
 		
     	// Check if user class extends correct parent class
-		String superClassName = KSocketServerThread.class.getName();
+		String superClassName1 = KSocketServerThread.class.getName();
+		String superClassName2 = KHTTPServerThread.class.getName();
 		
-		if (!gUserClass.getSuperclass().getName().equals(superClassName)) {
-			KLog.error("{} must extend {}", argClassName, superClassName);
+		if (!gUserClass.getSuperclass().getName().equals(superClassName1) && 
+		    !gUserClass.getSuperclass().getName().equals(superClassName2)) {
+			KLog.error("{} must not extend class {}", argClassName, gUserClass.getSuperclass().getName());
     		return;
     	}
 		
@@ -108,7 +110,7 @@ class KSocketServerListener extends Thread implements AutoCloseable{
 		}
 		
 		if (socketsCleared > 0) {
-			KLog.debug("Number of inactive client connection removed: {}", socketsCleared);
+			KLog.debug("Inactive client connections removed: {}", socketsCleared);
 		}
 	}
 	

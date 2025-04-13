@@ -1,9 +1,8 @@
 package ch.k43.util;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
@@ -11,7 +10,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
 /**
- * Class to handle user connections accepted by KSocketServerListener.<br>
+ * Class to handle user connections accepted by KSocketServerListener. The input is read as characters while output is sent as bytes.
  * 
  * @see getLastError
  * @see isSecuredConnection
@@ -24,7 +23,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	// Class variables
 	private	Socket				gSocket					= null;
 	private BufferedReader		gBufferedReader			= null;
-	private BufferedWriter		gBufferedWriter			= null;
+	private OutputStream		gOutputStream			= null;
 	private String				gThisClassName			= null;
 	private String				gUsedProtocol			= null;
 	private String				gUsedCiphers			= null;
@@ -35,7 +34,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	private boolean				gIsSecuredConnection	= false;
 	
 	/**
-	 * Prohibit default class constructor without arguments.<br>
+	 * Prohibit default class constructor without arguments.
 	 */
 	@SuppressWarnings("unused")
 	private KSocketServerThread() {
@@ -94,7 +93,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 			KLog.error(gLastErrorMessage);
 		}
 
-		KLog.debug("{} thread started", gThisClassName);
+		KLog.debug("Thread {} started", gThisClassName);
 		
 		// Get remote endpoint without starting slash
 		String remoteAddress = gSocket.getRemoteSocketAddress().toString();
@@ -107,7 +106,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 		// Establish input/output streams
 		try {
 			gBufferedReader	= new BufferedReader(new InputStreamReader(gSocket.getInputStream()));
-			gBufferedWriter	= new BufferedWriter(new OutputStreamWriter(gSocket.getOutputStream()));
+			gOutputStream	= gSocket.getOutputStream();
 		} catch (Exception e) {
 			gLastErrorMessage = e.toString();
 			KLog.error(gLastErrorMessage);
@@ -130,9 +129,9 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 		}
 
 		try {
-			if (gBufferedWriter != null) {
-				gBufferedWriter.close();
-				gBufferedWriter = null;
+			if (gOutputStream != null) {
+				gOutputStream.close();
+				gOutputStream = null;
 			}
 		} catch (Exception e) {
 			KLog.error(e.toString());
@@ -155,7 +154,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 		gIsConnected			= false;
 		gIsSecuredConnection	= false;
 		
-		KLog.debug("{} thread terminated", this.getClass().getName());
+		KLog.debug("Thread {} terminated", this.getClass().getName());
 	}
 	
 	/**
@@ -285,7 +284,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 			bytesRead = gBufferedReader.read(argData, 0, argData.length);
 			
 			if (bytesRead != -1) {
-				KLog.debug("Character array data received ({})", K.formatBytes(bytesRead));
+				KLog.debug("Data read ({} characters)", K.formatBytes(bytesRead));
 			} else {
 				KLog.debug("End-of-data received");
 			}
@@ -316,7 +315,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 			lineRead = gBufferedReader.readLine();
 			
 			if (lineRead != null) {
-				KLog.debug("String data received ({} characters)", lineRead.length());
+				KLog.debug("Data read ({} characters)", lineRead.length());
 			} else {
 				KLog.debug("End-of-data received");
 			}
@@ -345,18 +344,28 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	 */
 	@Override
 	public String toString() {
-		return "KSocketServerThread [gSocket=" + gSocket + ", gBufferedReader=" + gBufferedReader + ", gBufferedWriter="
-				+ gBufferedWriter + ", gThisClassName=" + gThisClassName + ", gUsedProtocol=" + gUsedProtocol
+		return "KSocketServerThread [gSocket=" + gSocket + ", gBufferedReader=" + gBufferedReader + ", gOutputStream="
+				+ gOutputStream + ", gThisClassName=" + gThisClassName + ", gUsedProtocol=" + gUsedProtocol
 				+ ", gUsedCiphers=" + gUsedCiphers + ", gLastErrorMessage=" + gLastErrorMessage
 				+ ", gAuthenticatedClient=" + gAuthenticatedClient + ", gPortNumber=" + gPortNumber + ", gIsConnected="
 				+ gIsConnected + ", gIsSecuredConnection=" + gIsSecuredConnection + "]";
 	}
 	
 	/**
-	 * Write byte array to socket.<br>
+	 * Write byte array to socket.
 	 * 
-	 * @param	argData	Byte array to be written
+	 * @param	argData	Character array to be written
 	 * @return	True if successful, false otherwise
+	 */
+	public boolean write(char[] argData) {
+		return write(new String(argData).getBytes(StandardCharsets.UTF_8));
+	}
+	
+	/**
+	 * Write character array to socket.
+	 *
+	 * @param	argData	Byte to be written
+	 * @return 	True if successful, false otherwise
 	 */
 	public boolean write(byte[] argData) {
 		
@@ -364,33 +373,9 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 		gLastErrorMessage = null;
 
 		try {
-			gBufferedWriter.write(new String(argData, StandardCharsets.UTF_8).toCharArray());
-			gBufferedWriter.flush();
-			KLog.debug("Byte array data sent ({})", K.formatBytes(argData.length));
-			return (true);
-			
-		} catch (Exception e) {
-			gLastErrorMessage = e.toString();
-			KLog.error(gLastErrorMessage);
-			return (false);
-		}
-	}
-	
-	/**
-	 * Write character array to socket.<br>
-	 *
-	 * @param	argData	Character array to be written
-	 * @return 	True if successful, false otherwise
-	 */
-	public boolean write(char[] argData) {
-		
-		// Clear error message
-		gLastErrorMessage = null;
-
-		try {
-			gBufferedWriter.write(argData);
-			gBufferedWriter.flush();
-			KLog.debug("Character array data sent ({} characters)", argData.length);
+			gOutputStream.write(argData);
+			gOutputStream.flush();
+			KLog.debug("Data sent ({})", K.formatBytes(argData.length));
 			return (true);
 			
 		} catch (Exception e) {
@@ -401,31 +386,17 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	}
 
 	/**
-	 * Write string to socket.<br>
+	 * Write string to socket.
 	 * 
 	 * @param	argLine	String to be written
 	 * @return	True if successful, false otherwise
 	 */
 	public boolean write(String argLine) {
-		
-		// Clear error message
-		gLastErrorMessage = null;
-
-		try {
-			gBufferedWriter.write(argLine);
-			gBufferedWriter.flush();
-			KLog.debug("String data sent ({} characters)", argLine.length());
-			return (true);
-			
-		} catch (Exception e) {
-			gLastErrorMessage = e.toString();
-			KLog.error(gLastErrorMessage);
-			return (false);
-		}
+		return write(argLine.getBytes(StandardCharsets.UTF_8));
 	}
 
 	/**
-	 * Write line terminated with a platform dependent end-of-line to socket.<br>
+	 * Write line terminated with a platform dependent end-of-line to socket.
 	 * 
 	 * @param	argLine	String to be written
 	 * @return	True if successful, false otherwise
@@ -433,6 +404,6 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	 * @since 2024.05.25
 	 */
 	public boolean writeLine(String argLine) {
-		return (write(argLine + K.LINE_SEPARATOR));
+		return write((argLine + K.LINE_SEPARATOR).getBytes(StandardCharsets.UTF_8));
 	}
 }
