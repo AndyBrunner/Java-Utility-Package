@@ -18,9 +18,12 @@ import java.util.logging.LogRecord;
 public class KLogLineFormatter extends Formatter {
 	
 	// Class variables
-	private static final String	ERROR_PREFIX		= "===> ";
+	private static final	String		ERROR_PREFIX			= "===> ";
+	private static final	int			MAX_CODE_LOCATION_SIZE	= 60;
+	private static final	String		FORMAT_LOCATION_STRING	= "%-" + (MAX_CODE_LOCATION_SIZE + 1) + 's';
 
-	private String				gLastTraceLocation	= "N/A";
+	// Instance variables
+	private					String		gLastTraceLocation		= "N/A";
 	
 	/**
 	 * Class constructor.
@@ -36,17 +39,14 @@ public class KLogLineFormatter extends Formatter {
 	public String format(LogRecord argRecord) {
 		
 		// Declarations
-		final int			MAX_CODE_LOCATION	= 60;
-		StringBuilder		logString			= new StringBuilder();
-		boolean				logSevere			= false;
+		StringBuilder		logString				= new StringBuilder();
+		boolean				logSevere				= false;
 
 		// Format time stamp in ISO 8601 format (e.g. 2024-02-24T14:12:44.234)
-		logString.append(K.getTimeISO8601());
-		logString.append(' ');
+		logString.append(K.getTimeISO8601()).append(' ');
 		
 		// Format abbreviated logging level
-		switch (argRecord.getLevel().toString()) {
-		
+		switch (argRecord.getLevel().toString().toUpperCase()) {
 			case "FINEST":
 				logString.append('D');
 				break;
@@ -71,7 +71,7 @@ public class KLogLineFormatter extends Formatter {
 		
 		if (posDelimiter != -1) {
 			traceLocation		= traceMessage.substring(0, posDelimiter);
-			traceMessage		= traceMessage.substring(posDelimiter + 3);
+			traceMessage		= traceMessage.substring(posDelimiter + KLog.LOG_DELIMITER.length());
 			// Save last trace location in case the next entry has none
 			gLastTraceLocation	= traceLocation; 
 		} else {
@@ -79,17 +79,13 @@ public class KLogLineFormatter extends Formatter {
 			traceLocation	= gLastTraceLocation;
 		}
 
-		// Left shorten entire code location line
-		if (traceLocation.length() > MAX_CODE_LOCATION) {
-			traceLocation = traceLocation.substring(traceLocation.length() - MAX_CODE_LOCATION);
-		}
-		
-		logString.append(String.format("%-" + (MAX_CODE_LOCATION + 1) + 's', traceLocation));
+		logString.append(String.format(FORMAT_LOCATION_STRING, K.truncateMiddle(traceLocation, MAX_CODE_LOCATION_SIZE)));
 		
 		// Format the passed log message
 		if (logSevere) {
 			traceMessage = ERROR_PREFIX + traceMessage;
 		}
+		
 		logString.append(traceMessage);
 		
 		// Return formatted message

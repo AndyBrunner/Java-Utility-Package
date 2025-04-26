@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.zip.Deflater;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.Inflater;
 
 import javax.crypto.Cipher;
@@ -49,11 +51,10 @@ public class K {
 	//
 	// Public constants
 	//
-	
 	/**
 	 * Package version number. Example is "2025.01.24".
 	 */
-	public static final		String				VERSION				= "2025.04.13";			// Also change docs/version-check/version.txt
+	public static final		String				VERSION				= "2025.04.26";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
@@ -175,11 +176,11 @@ public class K {
 	 */
 	public static final 	double				SIZE_YIB 			= SIZE_ZIB * 1_024d;
 	
-	//
-	// Private class variables
-	//
-	private static ConcurrentHashMap<Thread, KLocalData>	gLocalData			= new ConcurrentHashMap<>(1);		
-
+	/**
+	 * Default buffer size for file operations
+	 */
+	public static final		int					FILE_IO_BUFFER_SIZE	= 4_096;
+	
 	//
 	// Private class constants
 	//
@@ -188,7 +189,11 @@ public class K {
 	private static final 	String				VERSION_URL			= "https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt";	
 	private static final 	String				AES_256_CIPHER		= "AES/CBC/PKCS5Padding";
 	private static final 	String				SHA_256				= "SHA-256";
-	private static final	int					FILE_IO_BUFFER_SIZE	= 4_096;
+
+	//
+	// Private class variables
+	//
+	private static ConcurrentHashMap<Thread, KLocalData>	gLocalData			= new ConcurrentHashMap<>(1);		
 
 	//
 	// Static block to initialize class
@@ -249,9 +254,38 @@ public class K {
 		}
 		
 		TEMP_DIRECTORY = directoryName;
-		
 	}
 
+	/**
+	 * Compress the passed data using the GZIP algorithm.
+	 * 
+	 * @param argBuffer Data to be compressed
+	 * @return Decompressed data or empty array for for errors
+	 * 
+	 * @since 2025.04.18
+	 */
+	public static byte[] compressGZIP(byte[] argBuffer) {
+
+		// Check arguments
+		if (K.isEmpty(argBuffer)) {
+			return new byte[0];
+		}
+
+		// Declarations
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		
+	    try (GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream)) {
+	    	gzipOutputStream.write(argBuffer);
+	    } catch (Exception e) { 
+    		KLog.error("GZIP compression failed: ", e.toString());
+    		return new byte[0];
+    	}
+	    
+		byte[] compressedData = byteArrayOutputStream.toByteArray();
+	    KLog.debug("GZIP compression successful (input {}, output {})", K.formatBytes(argBuffer.length), K.formatBytes(byteArrayOutputStream.size()));
+        return compressedData;
+	}
+	
 	/**
 	 * Compress the passed data using the ZLIB algorithm.
 	 * 
@@ -260,18 +294,23 @@ public class K {
 	 * 
 	 * @since 2024.08.11
 	 */
-	public static byte[] compressZLIB(byte [] argBuffer) {
+	public static byte[] compressZLIB(byte[] argBuffer) {
+		
+		// Check arguments
+		if (K.isEmpty(argBuffer)) {
+			return new byte[0];
+		}
 		
 		// Create and initialize deflater
 		Deflater deflater = new Deflater();
 	    deflater.setInput(argBuffer);
 	    deflater.finish();
+	    
+	    byte[]	buffer 			= new byte[FILE_IO_BUFFER_SIZE];
+	    int		bufferLength	= 0;
 
-	    ByteArrayOutputStream	outputStream	= new ByteArrayOutputStream();
-	    byte[]					buffer 			= new byte[FILE_IO_BUFFER_SIZE];
-	    int						bufferLength	= 0;
-
-	    try {
+	    try (ByteArrayOutputStream outputStream	= new ByteArrayOutputStream()) {
+	    	
 		    while (!deflater.finished()) {
 		        bufferLength = deflater.deflate(buffer);
 		        outputStream.write(buffer, 0, bufferLength);
@@ -282,14 +321,11 @@ public class K {
 
 		    return compressedData;
 		    
+	    } catch (Exception e) {
+    		KLog.error("ZLIB compression failed: {}", e.toString());
+    		return new byte[0];
 	    } finally {
 	    	deflater.end();
-
-	    	try {
-			    outputStream.close();
-	    	} catch (Exception e) {
-	    		KLog.error("Output stream close error: {}", e.toString());
-	    	}
 	    }
 	}
 	
@@ -507,6 +543,44 @@ public class K {
 	}
 	
 	/**
+	 * Decompress the passed data using the GZIP algorithm.
+	 * 
+	 * @param argBuffer Data to be decompressed
+	 * @return Decompressed data or empty array for for errors
+	 * 
+ 	 * @since 2025.04.18
+	 */
+	public static byte[] decompressGZIP(byte[] argBuffer) {
+		
+		// Check arguments
+		if (K.isEmpty(argBuffer)) {
+			return new byte[0];
+		}
+		
+	    try (ByteArrayInputStream	byteArrayInputStream	= new ByteArrayInputStream(argBuffer);
+	    	 GZIPInputStream		gzipInputStream			= new GZIPInputStream(byteArrayInputStream);
+	         ByteArrayOutputStream	outputStream			= new ByteArrayOutputStream()) {
+	    	    	
+	    	byte[] buffer = new byte[FILE_IO_BUFFER_SIZE];
+	        int len;
+	    
+	        while ((len = gzipInputStream.read(buffer)) != -1) {
+	            outputStream.write(buffer, 0, len);
+	        }
+
+	        byte[] result = outputStream.toByteArray();
+
+	        KLog.debug("GZIP decompression successful (input {}, output {})", 
+	                      K.formatBytes(argBuffer.length), K.formatBytes(result.length));
+	        return result;
+
+	    } catch (Exception e) {
+	        KLog.error("GZIP decompression failed: {}", e.toString());
+	        return new byte[0];
+	    }
+	}
+	
+	/**
 	 * Decompress the passed data using the ZLIB algorithm.
 	 * 
 	 * @param argBuffer Data to be decompressed
@@ -525,13 +599,19 @@ public class K {
 	    Inflater inflater = new Inflater();
 	    inflater.setInput(argBuffer);
 
-	    ByteArrayOutputStream	outputStream	= new ByteArrayOutputStream();
-	    byte[]					buffer 			= new byte[FILE_IO_BUFFER_SIZE];
-	    int						bufferLength	= 0;
+	    byte[]	buffer 			= new byte[FILE_IO_BUFFER_SIZE];
+	    int		bufferLength	= 0;
 
-	    try {
+	    try (ByteArrayOutputStream outputStream	= new ByteArrayOutputStream()) {
+	    	
 		    while (!inflater.finished()) {
 		        bufferLength = inflater.inflate(buffer);
+		        
+		        // Occasionally, inflater returns 0
+		        if (bufferLength == 0 && inflater.needsInput()) {
+		            break;
+		        }
+		        
 		        outputStream.write(buffer, 0, bufferLength);
 		    }
 		    
@@ -541,17 +621,10 @@ public class K {
 		    return decompressedData;
 		    
 	    } catch (Exception e) {
-			KLog.error("Unable to ZLIB decompress: {}", e.toString());
+			KLog.error("ZLIB decompression failed: {}", e.toString());
 			return new byte[0];
 	    } finally {
-	    	
 	        inflater.end();
-	        
-	        try {
-	            outputStream.close();
-	        } catch (Exception e) {
-	            KLog.error("Output stream close error: {}", e.toString());
-	        }
 	    }
 	}
 	
@@ -562,8 +635,8 @@ public class K {
 	 * 
 	 * <pre>
 	 * Example:
-	 * byte[] clearText		= "Some datq to be encrypted".getBytes();
-	 * byte[] secureKey		= "SomeSecureKey".getBytes();
+	 * byte[] clearText		= "Some datq to be encrypted".getBytes(StandardCharsets.UTF_8);
+	 * byte[] secureKey		= "SomeSecureKey".getBytes(StandardCharsets.UTF_8);
 	 * byte[] iv			= K.getRandomBytes(16);
 	 * byte[] encrBuffer	= K.encryptAES256(clearText, secureKey, iv);
 	 * byte[] decrBuffer	= K.decryptAES256(encrBuffer, secureKey, iv);
@@ -936,8 +1009,8 @@ public class K {
 	 * 
 	 * <pre>
 	 * Example:
-	 * byte[] clearText		= "Some data to be encrypted".getBytes();
-	 * byte[] secureKey		= "SomeSecureKey".getBytes();
+	 * byte[] clearText		= "Some data to be encrypted".getBytes(StandardCharsets.UTF_8);
+	 * byte[] secureKey		= "SomeSecureKey".getBytes(StandardCharsets.UTF_8);
 	 * byte[] iv			= K.getRandomBytes(16);
 	 * byte[] encrBuffer	= K.encryptAES256(clearText, secureKey, iv);
 	 * byte[] decrBuffer	= K.decryptAES256(encrBuffer, secureKey, iv);
@@ -1245,8 +1318,7 @@ public class K {
     		case 429: return "Too Many Requests";
     		case 431: return "Request Header Fields Too Large";
     		case 451: return "Unavailable For Legal Reasons";
-    		
-    		
+     		
     		// Server Error
     		case 500: return "Internal Server Error";
     		case 501: return "Not Implemented";
@@ -1501,7 +1573,7 @@ public class K {
 			return new byte[0];
 		}
 		
-		KLog.debug("Password hash completed ({} iterations, {} ms)", argIteration, timer.getElapsedMilliseconds());
+		KLog.debug("Password hashing with SHA3-512 completed ({} iterations, {} ms)", argIteration, timer.getElapsedMilliseconds());
 		return passwordHash;
 	}
 	
@@ -1521,7 +1593,7 @@ public class K {
 		KLog.argException(K.isEmpty(argPassword), "K.getPasswordHash(): argPassword is required");
 		KLog.argException(K.isEmpty(argSalt), "K.getPasswordHash(): argSalt is required");
 		
-		return getPasswordHash(argPassword.getBytes(), argSalt.getBytes(), 500_000);
+		return getPasswordHash(argPassword.getBytes(StandardCharsets.UTF_8), argSalt.getBytes(StandardCharsets.UTF_8), 500_000);
 	}
 	
 	/**
@@ -1929,6 +2001,9 @@ public class K {
 	 */
 	public static KeyStore loadKeyStore(String argFileName, char[] argPassword) {
 		
+		// Check arguments
+		KLog.argException(K.isEmpty(argPassword), "K.loadKeyStore(): argFileName must not be empty");
+		
 	    KLog.debug("Loading Java KeyStore File {}", argFileName);
 		
 	    try (FileInputStream fis = new FileInputStream(argFileName)) {
@@ -2029,6 +2104,42 @@ public class K {
 	}
 	
 	/**
+	 * Repeat the given character.
+	 * 
+	 * @param argCharacter	Character to repeat
+	 * @param argCount		Number to repeat
+	 * @return	Resulting string
+	 * 
+	 * @since 2025.04.19
+	 */
+	public static String repeat(char argCharacter, int argCount) {
+		return repeat("" + argCharacter, argCount);
+	}
+
+	/**
+	 * Repeat the given string.
+	 * 
+	 * @param argString	String to repeat
+	 * @param argCount	Number to repeat
+	 * @return	Resulting string
+	 * 
+	 * @since 2025.04.19
+	 */
+	public static String repeat(String argString, int argCount) {
+		
+		// Check arguments
+		KLog.argException(K.isEmpty(argString), "K.repeat(): argString must not be empty");
+		KLog.argException(argCount < 1 || argCount > 1000000, "K.repeat(): argCount must be between 1 and 1000000");
+		
+		StringBuilder newString = new StringBuilder(argString.length() * argCount);
+
+	    for (int i = 0; i < argCount; i++) {
+	    	newString.append(argString);
+	    }
+	    return newString.toString();
+	}
+	
+	/**
 	 * Replace parameter holders "{}" with the passed arguments.
 	 * 
 	 * @param	argData		Message text
@@ -2071,7 +2182,7 @@ public class K {
 
 		return result.toString();
 	}
-		
+	
 	/**
      * Return rounded value.
      * 
@@ -2275,6 +2386,24 @@ public class K {
 	}
 	
 	/**
+	 * Format char array as hexadecimal string representation.
+	 * 
+	 * @param	argChars	Character array to be formatted
+	 * @return	Hexadecimal string
+	 * 
+	 * @since 2025.04.21
+	 */
+	public static String toHex(char[] argChars) {
+
+		// Check argument
+		if (K.isEmpty(argChars)) {
+			return "";
+		}
+		
+		return toHex(new String(argChars).getBytes(StandardCharsets.UTF_8));
+	}
+	
+	/**
 	 * Format string as hexadecimal string representation.
 	 * 
 	 * @param	argString	String to be formatted
@@ -2289,8 +2418,9 @@ public class K {
 			return "";
 		}
 		
-		return toHex(argString.getBytes());
+		return toHex(argString.getBytes(StandardCharsets.UTF_8));
 	}
+	
 	
 	/**
 	 * Return PEM formatted string from the passed object. Supported objects are PrivateKey, PublicKey, Certificate, KeyPair and KeyStore. 
@@ -2344,7 +2474,7 @@ public class K {
 	public static String toPEM(Object argObject, char[] argPassword, boolean argComments) {
 		
 		// Check argument
-		KLog.argException(argObject == null, "toPEM(): argObject is required");
+		KLog.argException(argObject == null, "K.toPEM(): argObject is required");
 		
     	StringBuilder	pemString		= new StringBuilder();
 		String			generatorString	= "# PEM-Created: " + K.getTimeISO8601() + " (" + K.class.getName() + '/' + K.VERSION + ")\n";
@@ -2507,6 +2637,54 @@ public class K {
 	    KLog.debug("{} formatted: {}", pemLabel, pemDescription);
 	    
 	    return pemString.toString();
+	}
+	
+	/**
+	 * Truncate string by replacing characters from the middle with "...".
+	 * 
+	 * @param	argString		String to be shortened
+	 * @param	argMaxLength	Maximum string length
+	 * @return	Resulting string or original string if invalid parameters were given
+	 * 
+	 * @since 2025.04.17
+	 */
+	public static String truncateMiddle(String argString, int argMaxLength) {
+		return truncateMiddle(argString, argMaxLength, "...");
+	}
+	
+	/**
+	 * Truncate string by replacing characters from the middle.
+	 * 
+	 * @param	argString		String to be shortened
+	 * @param	argMaxLength	Maximum string length
+	 * @param	argEllipsis		Replacement string
+	 * @return	Resulting string
+	 * 
+	 * @since 2025.04.17
+	 */
+	public static String truncateMiddle(String argString, int argMaxLength, String argEllipsis) {
+		
+		// Check parameters
+		KLog.argException(K.isEmpty(argString), "K.truncateMiddle(): argString must not be empty");
+		KLog.argException(K.isEmpty(argEllipsis), "K.truncateMiddle(): argEllipsis must not be empty");
+		KLog.argException(argMaxLength < 1 || argMaxLength < (argEllipsis.length() + 2), "K.truncateMiddle(): argMaxLength too small for argEllipsis");
+		
+		// Check if string does not needed to be shortened
+		if (argString.length() <= argMaxLength) {
+			return argString;
+		}
+		
+		int stringLength	= argString.length();
+        int ellipsisLength	= argEllipsis.length();
+        int partLength		= (argMaxLength - ellipsisLength) / 2;
+        
+        // Add 1 extra character to the start part if maximum string length is uneven
+        int adjustLength = (argMaxLength - ellipsisLength) % 2;
+                        
+        String start	= argString.substring(0, partLength + adjustLength);
+        String end		= argString.substring(stringLength - partLength);
+
+        return start + argEllipsis + end;
 	}
 	
 	/**

@@ -210,7 +210,7 @@ public abstract class KHTTPServerThread extends KSocketServerThread {
 			String		httpParameter	= null;
 			int			contentLength	= -1;
 			
-			if (httpRequest.length < 2) {
+			if (httpRequest.length < 3) {
 				break;
 			}
 			
@@ -420,7 +420,7 @@ public abstract class KHTTPServerThread extends KSocketServerThread {
 	 * @return	True for success, false otherwise
 	 */
 	public boolean sendHTML(String argMessage, Object... argObjects) {
-		return sendResponse(200, "text/html; charset=UTF-8", null, K.replaceParams(argMessage, argObjects).getBytes());
+		return sendResponse(200, "text/html; charset=UTF-8", null, K.replaceParams(argMessage, argObjects).getBytes(StandardCharsets.UTF_8));
 	}
 	
 	/**
@@ -512,7 +512,7 @@ public abstract class KHTTPServerThread extends KSocketServerThread {
 	 * @return	True for success, false otherwise
 	 */
 	public boolean sendText(int argStatus, String argMessage, Object... argObjects) {
-		return sendResponse(argStatus, "text/plain; charset=UTF-8", null, K.replaceParams(argMessage, argObjects).getBytes());
+		return sendResponse(argStatus, "text/plain; charset=UTF-8", null, K.replaceParams(argMessage, argObjects).getBytes(StandardCharsets.UTF_8));
 	}
 
 	/**
@@ -524,7 +524,7 @@ public abstract class KHTTPServerThread extends KSocketServerThread {
 	 * @return	True for success, false otherwise
 	 */
 	public boolean sendText(String argMessage, Object... argObjects) {
-		return sendResponse(200, "text/plain; charset=UTF-8", null, K.replaceParams(argMessage, argObjects).getBytes());
+		return sendResponse(200, "text/plain; charset=UTF-8", null, K.replaceParams(argMessage, argObjects).getBytes(StandardCharsets.UTF_8));
 	}
 	
 	/**

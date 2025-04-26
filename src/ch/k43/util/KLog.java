@@ -190,12 +190,12 @@ public class KLog {
 		}
 		
 		//
-		// Log environment
+		// Log environment if in debug mode
 		//
 		if (isLevelDebug()) {
 		
 			debug("===== Application started {} =====", K.getTimeISO8601(K.START_TIME));
-			debug("Java Utility Package (Freeware) Version {}", K.VERSION);
+			debug("Java Utility Package (Open Source/Freeware) Version {}", K.VERSION);
 			debug("Homepage java-util.k43.ch - Please send any feedback to andy.brunner@k43.ch");
 
 			// Show properties file name and logging level override
@@ -261,7 +261,7 @@ public class KLog {
 					System.getProperty("java.class.path", "n/a").trim());
 			
 			// User name
-			debug("Current user {}, language {}, directory {}",
+			debug("Current user {}, language {}, home directory {}",
 					K.USER_NAME,
 					K.USER_LANGUAGE,
 					K.HOME_DIRECTORY);
@@ -285,7 +285,7 @@ public class KLog {
 	 */
 	public static void abort(boolean argExpression, String argMessage, Object... argObjects) {
 
-		// Check if expression is true and message present
+		// Check if anything to log
 		if ((!argExpression) || (K.isEmpty(argMessage))) {
 			return;
 		}
@@ -317,7 +317,30 @@ public class KLog {
 	 * @param	argObjects		Optional arguments for {} parameters 
 	 */
 	public static void abort(String argMessage, Object... argObjects) {
-		abort(true, K.replaceParams(argMessage, argObjects));
+		
+		// Check if anything to log
+		if (K.isEmpty(argMessage)) {
+			return;
+		}
+		
+		// Replace {} parameters if present
+		String workString = K.replaceParams(argMessage, argObjects);
+		
+		// Save error message even if logging is not active
+		K.saveError(workString);
+		
+		// Check if logging is active
+		if (!isActive()) {
+			return;
+		}
+
+		// Format and write log message with code location
+		write(Level.SEVERE, formatLogMessage(workString));
+
+		// Log and throw exception
+		RuntimeException runtimeException = new RuntimeException(workString);
+		logStackTrace(runtimeException);
+		throw runtimeException;
 	}
 	
 	/**
@@ -332,7 +355,7 @@ public class KLog {
 	 */
 	public static void argException(boolean argExpression, String argMessage, Object... argObjects) {
 		
-		// Check if expression is true and message present
+		// Check if anything to log
 		if ((!argExpression) || (K.isEmpty(argMessage))) {
 			return;
 		}
@@ -367,7 +390,30 @@ public class KLog {
 	 * @since 2025.03.16
 	 */
 	public static void argException(String argMessage, Object... argObjects) {
-		argException(true, argMessage, argObjects);
+		
+		// Check if anything to log
+		if (K.isEmpty(argMessage)) {
+			return;
+		}
+		
+		// Replace {} parameters if present
+		String workString = K.replaceParams(argMessage, argObjects);
+		
+		// Save error message even if logging is not active
+		K.saveError(workString);
+		
+		// Check if logging is active
+		if (!isActive()) {
+			return;
+		}
+		
+		// Format and write log message with code location
+		write(Level.SEVERE, formatLogMessage(workString));
+		
+		// Create, format and throw unchecked exception
+		IllegalArgumentException exception = new IllegalArgumentException(workString);
+		logStackTrace(exception);
+		throw exception;
 	}
 
 	/**
@@ -398,6 +444,26 @@ public class KLog {
 	}
 	
 	/**
+	 * Log debug message if expression is true.
+	 * 
+	 * @param	argExpression	True/False Any expression
+	 * @param	argMessage		Message to be logged
+	 * @param	argObjects		Optional arguments for {} parameters
+	 * 
+	 * @since 2025.04.22
+	 */
+	public static void debug(boolean argExpression, String argMessage, Object... argObjects) {
+
+		// Check if anything to log
+		if ((!isActive()) || (!argExpression) || (K.isEmpty(argMessage))) {
+			return;
+		}
+		
+		// Write log message
+		write(Level.FINEST, formatLogMessage(K.replaceParams(argMessage, argObjects)));
+	}
+	
+	/**
 	 * Write log message of level FINEST.
 	 * 
 	 * @param	argMessage		Message to be written
@@ -405,16 +471,13 @@ public class KLog {
 	 */
 	public static void debug(String argMessage, Object... argObjects) {
 
-		// Check if logging is active and valid arguments given
+		// Check if anything to log
 		if ((!isActive()) || (K.isEmpty(argMessage))) {
 			return;
 		}
 		
-		// Replace {} parameters if present
-		String workString = K.replaceParams(argMessage, argObjects);
-		
 		// Write log message
-		write(Level.FINEST, formatLogMessage(workString));
+		write(Level.FINEST, formatLogMessage(K.replaceParams(argMessage, argObjects)));
 	}
 	
 	/**
@@ -426,7 +489,7 @@ public class KLog {
 	 */
 	public static void error(boolean argExpression, String argMessage, Object... argObjects) {
 
-		// Check if expression is true and message present
+		// Check if anything to log
 		if ((!argExpression) || (K.isEmpty(argMessage))) {
 			return;
 		}
@@ -453,7 +516,7 @@ public class KLog {
 	 */
 	public static void error(Exception argException) {
 
-		// Check if expression is true and message present
+		// Check if anything to log
 		if (K.isEmpty(argException)) {
 			return;
 		}
@@ -479,7 +542,7 @@ public class KLog {
 	 * @param	argObjects		Optional arguments for {} parameters 	 */
 	public static void error(String argMessage, Exception argException, Object... argObjects) {
 
-		// Check if expression is true and message present
+		// Check if anything to log
 		if ((K.isEmpty(argMessage)) || (K.isEmpty(argException))) {
 			return;
 		}
@@ -510,7 +573,7 @@ public class KLog {
 	 */
 	public static void error(String argMessage, Object... argObjects) {
 
-		// Check if expression is true and message present
+		// Check if anything to log
 		if (K.isEmpty(argMessage)) {
 			return;
 		}
@@ -550,7 +613,7 @@ public class KLog {
 			.append((K.JVM_MAJOR_VERSION < 19) ? Thread.currentThread().getId() : Thread.currentThread().threadId())
 			.append("]:");
 
-		// Format calling class, method and line number
+		// Format calling class, method and line number (4th element is the user code location issuing the KLog method call)
 		if (stackTraceElements.length > 3) {
 			strBuilder.append(stackTraceElements[3].getClassName())
 				.append(':')
@@ -586,14 +649,34 @@ public class KLog {
 	}
 	
 	/**
-	 * Write log message of level INFO.<br>
+	 * Log message if expression is true.
+	 * 
+	 * @param	argExpression	True/False Any expression
+	 * @param	argMessage		Message to be logged
+	 * @param	argObjects		Optional arguments for {} parameters
+	 * 
+	 * @since 2025.04.22
+	 */
+	public static void info(boolean argExpression, String argMessage, Object... argObjects) {
+
+		// Check if anything to log
+		if ((!isActive()) || (!argExpression) || (K.isEmpty(argMessage))) {
+			return;
+		}
+		
+		// Write log message
+		write(Level.INFO, formatLogMessage(K.replaceParams(argMessage, argObjects)));
+	}
+	
+	/**
+	 * Write log message of level INFO.
 	 * 
 	 * @param	argMessage		Message to be written
 	 * @param	argObjects		Optional arguments for {} parameters	 
 	 */
 	public static void info(String argMessage, Object... argObjects) {
 
-		// Check if logging is active and valid arguments given
+		// Check if anything to log
 		if ((!isActive()) || (K.isEmpty(argMessage))) {
 			return;
 		}
@@ -603,7 +686,7 @@ public class KLog {
 	}
 	
 	/**
-	 * Check if logging is active.<br>
+	 * Check if logging is active.
 	 * 
 	 * @return	True if logging is active, false otherwise
 	 */

@@ -17,9 +17,6 @@ import org.json.JSONObject;
  */
 public class KFile {
 	
-	// Class variables
-	private	static final int	BUFFER_SIZE			= 16384;	
-	
 	/**
 	 * Delete a file or directory.<br>
 	 * 
@@ -107,22 +104,21 @@ public class KFile {
 	 * Read file into byte array.<br>
 	 * 
 	 * @param	argFileName	File name
-	 * @return	Byte array with file content or null for errors
+	 * @return	Byte array with file content or empty buffer for errors
 	 */
 	public static byte[] readByteFile(String argFileName) {
 				
 		// Check argument
 		if (K.isEmpty(argFileName)) {
-			return (null);
+			return new byte[0];
 		}
 		
 		// Read file into buffer
-		try (FileInputStream fileInputStream = new FileInputStream(argFileName)) {
+		try (FileInputStream		fileInputStream	= new FileInputStream(argFileName);
+			 ByteArrayOutputStream	dataBuffer		= new ByteArrayOutputStream()) {
 
-			ByteArrayOutputStream dataBuffer = new ByteArrayOutputStream();
-
-		    int		readCount	= 0;
-		    byte[]	data		= new byte[BUFFER_SIZE];
+			int		readCount	= 0;
+		    byte[]	data		= new byte[K.FILE_IO_BUFFER_SIZE];
 
 		    while ((readCount = fileInputStream.read(data, 0, data.length)) != -1) {
 		        dataBuffer.write(data, 0, readCount);
@@ -136,7 +132,7 @@ public class KFile {
 			
 		} catch (Exception e) {
 			KLog.error("Unable to read file {}: {}", argFileName, e.toString());
-			return (null);
+			return new byte[0];
 		}
 	}
 	
@@ -228,10 +224,10 @@ public class KFile {
 	    
 		try (BufferedReader reader = new BufferedReader(new FileReader (new File(argFileName)))) {
 
-			String line				= null;
+			String inputLine = null;
 		    
-	        while((line = reader.readLine()) != null) {
-	            stringBuilder.append(line);
+	        while((inputLine = reader.readLine()) != null) {
+	            stringBuilder.append(inputLine);
 	            stringBuilder.append(K.LINE_SEPARATOR);
 	        }
 	        
@@ -397,7 +393,7 @@ public class KFile {
 		    return (true);
 	    	
 	    } catch (Exception e) {
-	    	KLog.error("Unable to read properties file {}: {}", argFileName, e.toString());
+	    	KLog.error("Unable to write properties file {}: {}", argFileName, e.toString());
 	    	return (false);
 	    }
 	}

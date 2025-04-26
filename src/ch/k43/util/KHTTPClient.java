@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.net.HttpURLConnection;
@@ -195,7 +196,7 @@ public class KHTTPClient {
  	 * @since 2024.05.22
 	 */
 	public boolean patch(String argURL, Properties argHeaders, String argPayload) {
-		return (xmit("PATCH", argURL, argHeaders, argPayload.getBytes()));
+		return (xmit("PATCH", argURL, argHeaders, argPayload.getBytes(StandardCharsets.UTF_8)));
 	}
 	
 	/**
@@ -219,7 +220,7 @@ public class KHTTPClient {
 	 * @return	True (if HTTP return code 200), else false
 	 */
 	public boolean post(String argURL, Properties argHeaders, String argPayload) {
-		return (xmit("POST", argURL, argHeaders, argPayload.getBytes()));
+		return (xmit("POST", argURL, argHeaders, argPayload.getBytes(StandardCharsets.UTF_8)));
 	}
 	
 	/**
@@ -247,7 +248,7 @@ public class KHTTPClient {
  	 * @since 2024.05.22
 	 */
 	public boolean put(String argURL, Properties argHeaders, String argPayload) {
-		return (xmit("PUT", argURL, argHeaders, argPayload.getBytes()));
+		return (xmit("PUT", argURL, argHeaders, argPayload.getBytes(StandardCharsets.UTF_8)));
 	}
 	
 	/**

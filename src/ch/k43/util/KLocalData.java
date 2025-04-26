@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * This data object is saved in a global HashMap where the Thread object is the HashMap key. To be thread-safe, the accessing code
  * needs to implement the required synchronization thru locking on the class variable K.gLocalData. 
  * 
- * @see K.getLocalData(), K.getLastError(), K.gerLastErrors(), K.saveError()
+ * @see K.getLocalData(), K.getLastError(), K.getLastErrors(), K.saveError()
  * 
  * @since 2025.02.03
  */

@@ -556,8 +556,8 @@ public class KDB implements AutoCloseable{
 		KTimer				timer	= new KTimer();
 
 		// Check arguments
-		KLog.argException(argDelimiter == ' ', "K.getDataAsCSV(): Non-blank delimiter is required");
-		KLog.argException(argDelimiter == '\"', "KgetDataAsCSV(): Quote character not allowed as delimiter");
+		KLog.argException(argDelimiter == ' ', "KDB.getDataAsCSV(): Non-blank delimiter is required");
+		KLog.argException(argDelimiter == '\"', "KDB.getDataAsCSV(): Quote character not allowed as delimiter");
 		
 		if (rows == null) {
 			return (null);
