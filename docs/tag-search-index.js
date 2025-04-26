@@ -1,1 +1,1 @@
-tagSearchIndex = [{"l":"Constant Field Values","h":"","u":"constant-values.html"}];updateSearchResults();
+tagSearchIndex = [{"l":"Constant Field Values","h":"","u":"constant-values.html"},{"l":"Java Utility Package (Open Source)","h":"package ch.k43.util","d":"Section","u":"ch/k43/util/package-summary.html#java-utility-package-open-source--heading"}];updateSearchResults();
