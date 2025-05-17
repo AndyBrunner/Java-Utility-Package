@@ -88,7 +88,7 @@ public class KLogCSVFormatter extends Formatter {
 		logString.append(K.encodeCSV(traceLocation) + gDelimiter);
 
 		// Append log message
-		logString.append(K.encodeCSV(traceMessage));
+		logString.append(K.encodeCSV(K.truncateMiddle(traceMessage, KLog.MAX_LOG_DATA)));
 		
 		// End the CSV line
 		logString.append(K.LINE_SEPARATOR);

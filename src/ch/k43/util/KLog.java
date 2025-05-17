@@ -56,6 +56,8 @@ public class KLog {
 	
 	protected static final	String		LOG_DELIMITER			= "∞∞∞";				// Used by KLog and all KLogxxxx formatter/handler
 
+	protected static final	int			MAX_LOG_DATA			= 1_000;
+	
 	private static final	String[]	EXCLUDE_CLASSES			= {
 																KLogJDBCHandler.class.getName(),
 																KLogSMTPHandler.class.getName(),
@@ -691,59 +693,43 @@ public class KLog {
 	 * @return	True if logging is active, false otherwise
 	 */
 	public static boolean isActive() {
-		return gLogLogger != null;
+		return ((gLogLogger != null) && (gLogLogger.getLevel() != Level.OFF));
 	}
 	
 	/**
-	 * Test logger level.
-	 * 
-	 * @param argLevel Logger level to test
-	 * @return True if level matches, false otherwise
-	 */
-	private static boolean isLevel(Level argLevel) {
-		
-		// Check if logging is active
-		if (!isActive()) {
-			return false;
-		}
-		
-		return gLogLogger.getLevel() == argLevel;
-	}
-	
-	/**
-	 * Check if logger is at level FINEST.<br>
+	 * Check if logger is in debug mode (level FINEST).
 	 * 
 	 * @return True if level matches, false otherwise
 	 */
 	public static boolean isLevelDebug() {
-		return isLevel(Level.FINEST);
+		return ((gLogLogger != null) && (gLogLogger.getLevel() == Level.FINEST));
 	}
 
 	/**
-	 * Check if logger is at level SEVERE
+	 * Check if logger is in debug mode (level SEVERE).
 	 * 
 	 * @return True if level matches, false otherwise
 	 */
 	public static boolean isLevelError() {
-		return isLevel(Level.SEVERE);
+		return ((gLogLogger != null) && (gLogLogger.getLevel() == Level.SEVERE));
 	}
 	
 	/**
-	 * Check if logger is at level INFO.<br>
+	 * Check if logger is in debug mode (level INFO).
 	 * 
 	 * @return True if level matches, false otherwise
 	 */
 	public static boolean isLevelInfo() {
-		return isLevel(Level.INFO);
+		return ((gLogLogger != null) && (gLogLogger.getLevel() == Level.INFO));
 	}
 	
 	/**
-	 * Check if logger is at level OFF.<br>
+	 * Check if logger is in debug mode (level OFF).
 	 * 
 	 * @return True if level matches, false otherwise
 	 */
 	public static boolean isLevelOff() {
-		return isLevel(Level.OFF);
+		return ((gLogLogger != null) && (gLogLogger.getLevel() == Level.OFF));
 	}
 
 	/**

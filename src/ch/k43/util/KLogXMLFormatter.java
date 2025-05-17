@@ -80,7 +80,7 @@ public class KLogXMLFormatter extends Formatter {
 		logString.append(INDENT_LEVEL_2 + "<Location>" + K.encodeXML(traceLocation) + "</Location>" + K.LINE_SEPARATOR);
 
 		// Append log message
-		logString.append(INDENT_LEVEL_2 + "<Text>" + K.encodeXML(traceMessage) + "</Text>" + K.LINE_SEPARATOR);
+		logString.append(INDENT_LEVEL_2 + "<Text>" + K.encodeXML(K.truncateMiddle(traceMessage, KLog.MAX_LOG_DATA)) + "</Text>" + K.LINE_SEPARATOR);
 
 		logString.append(INDENT_LEVEL_1 + "</LogEntry>" + K.LINE_SEPARATOR);
 

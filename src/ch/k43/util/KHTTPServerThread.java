@@ -185,7 +185,7 @@ public abstract class KHTTPServerThread extends KSocketServerThread {
 	 */
 	@Override
 	public void run() {
-
+		
 		// Log program start
 		KLog.debug("HTTP server thread started");
 
@@ -267,89 +267,96 @@ public abstract class KHTTPServerThread extends KSocketServerThread {
 			KLog.debug("HTTP request read ({} headers, {} payload, {} ms)", gRequestHeaders.size(), K.formatBytes(gPayloadData.length), timer.getElapsedMilliseconds());
 			
 			//
-			// Call appropriate method to handle HTTP request
+			// Call appropriate method to handle HTTP request by the overriding user subclass
 			//
-			timer.reset();
+			try {
+						
+				timer.reset();
 			
-			KLog.debug("HTTP {} /{} started", httpMethod, httpParameter);
+				KLog.debug("HTTP {} /{} started", httpMethod, httpParameter);
 			
-			switch (httpMethod.toUpperCase()) {
+				switch (httpMethod.toUpperCase()) {
 			
-				case "GET": {
-					if (!K.isEmpty(gPayloadData)) {
-						KLog.debug("Unsupported payload in HTTP GET request ignored");
+					case "GET": {
+						if (!K.isEmpty(gPayloadData)) {
+							KLog.debug("Unsupported payload in HTTP GET request ignored");
+						}
+						get(K.decodeURL(httpParameter));
+						break;
 					}
-					get(K.decodeURL(httpParameter));
-					break;
-				}
 
-				case "HEAD": {
-					if (!K.isEmpty(gPayloadData)) {
-						KLog.debug("Unsupported payload in HTTP HEAD request ignored");
+					case "HEAD": {
+						if (!K.isEmpty(gPayloadData)) {
+							KLog.debug("Unsupported payload in HTTP HEAD request ignored");
+						}
+						head(K.decodeURL(httpParameter));
+						break;
 					}
-					head(K.decodeURL(httpParameter));
-					break;
-				}
 				
-				case "POST": {
-					if (K.isEmpty(gPayloadData)) {
-						KLog.debug("No payload sent with HTTP POST request");
+					case "POST": {
+						if (K.isEmpty(gPayloadData)) {
+							KLog.debug("No payload sent with HTTP POST request");
+						}
+						post(K.decodeURL(httpParameter), gPayloadData);
+						break;
 					}
-					post(K.decodeURL(httpParameter), gPayloadData);
-					break;
-				}
 				
-				case "PUT": {
-					if (K.isEmpty(gPayloadData)) {
-						KLog.debug("No payload sent with HTTP PUT request");
+					case "PUT": {
+						if (K.isEmpty(gPayloadData)) {
+							KLog.debug("No payload sent with HTTP PUT request");
+						}
+						put(K.decodeURL(httpParameter), gPayloadData);
+						break;
 					}
-					put(K.decodeURL(httpParameter), gPayloadData);
-					break;
-				}
 				
-				case "PATCH": {
-					if (K.isEmpty(gPayloadData)) {
-						KLog.debug("No payload sent with HTTP PATCH request");
+					case "PATCH": {
+						if (K.isEmpty(gPayloadData)) {
+							KLog.debug("No payload sent with HTTP PATCH request");
+						}
+						patch(K.decodeURL(httpParameter), gPayloadData);
+						break;
 					}
-					patch(K.decodeURL(httpParameter), gPayloadData);
-					break;
-				}
 				
-				case "DELETE": {
-					delete(K.decodeURL(httpParameter), gPayloadData);
-					break;
-				}
+					case "DELETE": {
+						delete(K.decodeURL(httpParameter), gPayloadData);
+						break;
+					}
 				
-				case "OPTIONS": {
-					options(K.decodeURL(httpParameter), gPayloadData);
-					break;
-				}
+					case "OPTIONS": {
+						options(K.decodeURL(httpParameter), gPayloadData);
+						break;
+					}
 				
-				case "TRACE": {
-					trace(K.decodeURL(httpParameter), gPayloadData);
-					break;
-				}
+					case "TRACE": {
+						trace(K.decodeURL(httpParameter), gPayloadData);
+						break;
+					}
 								
-				case "CONNECT": {
-					connect(K.decodeURL(httpParameter), gPayloadData);
-					break;
-				}
+					case "CONNECT": {
+						connect(K.decodeURL(httpParameter), gPayloadData);
+						break;
+					}
 				
-				default: {
-					sendText(400, "{} method not supported", httpMethod);
-					break;
+					default: {
+						sendText(400, "{} method not supported", httpMethod);
+						break;
+					}
 				}
-			}
 			
-			KLog.debug("HTTP {} method completed ({} ms)", httpMethod, timer.getElapsedMilliseconds());
+				KLog.debug("HTTP {} method completed ({} ms)", httpMethod, timer.getElapsedMilliseconds());
+				
+			} catch (Exception e) {
+				KLog.error(e);
+				break;
+			}
 		}
 		
 		//
-		// Close connection
+		// Terminate connection
 		//
 		close();
 		
-		// Log program start
+		// Log program end
 		KLog.debug("HTTP server thread ended");
 	}
 	
@@ -367,7 +374,7 @@ public abstract class KHTTPServerThread extends KSocketServerThread {
 	/**
 	 * Send file.
 	 * 
-	 * @param argFileName Name (and path) of file to be sent
+	 * @param argFileName	Name (and path) of file to be sent
 	 * @param argDownload	Tell client (browser) to locally save the file
 	 * 
 	 * @return	True for success, false otherwise
@@ -528,7 +535,7 @@ public abstract class KHTTPServerThread extends KSocketServerThread {
 	}
 	
 	/**
-	 * Set maximum payload size to be read.
+	 * Set maximum payload size to be read (default is 50 MiB).
 	 * 
 	 * @param argMaxSize	Maximum payload size
 	 */

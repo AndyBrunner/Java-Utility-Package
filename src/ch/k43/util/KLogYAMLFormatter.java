@@ -95,7 +95,7 @@ public class KLogYAMLFormatter extends Formatter {
 		logString.append("  " + "Location: " + K.encodeYAML(traceLocation) + K.LINE_SEPARATOR);
 		
 		// Append log message
-		logString.append("  " + "Text: " + K.encodeYAML(traceMessage) + K.LINE_SEPARATOR);
+		logString.append("  " + "Text: " + K.encodeYAML(K.truncateMiddle(traceMessage, KLog.MAX_LOG_DATA)) + K.LINE_SEPARATOR);
 		
 		// Return formatted message
 		return (logString.toString());

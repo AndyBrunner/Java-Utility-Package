@@ -110,7 +110,7 @@ public class KLogJSONFormatter extends Formatter {
 		logString.append(INDENT_LEVEL_3 + K.encodeJSON("Location") + ": " + K.encodeJSON(traceLocation) + ',' + K.LINE_SEPARATOR);
 		
 		// Append log message
-		logString.append(INDENT_LEVEL_3 + K.encodeJSON("Text") + ": " + K.encodeJSON(traceMessage) + K.LINE_SEPARATOR);
+		logString.append(INDENT_LEVEL_3 + K.encodeJSON("Text") + ": " + K.encodeJSON(K.truncateMiddle(traceMessage, KLog.MAX_LOG_DATA)) + K.LINE_SEPARATOR);
 		
 		// End the JSON array entry
 		logString.append(INDENT_LEVEL_2 + '}');

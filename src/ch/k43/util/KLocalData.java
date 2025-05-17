@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 class KLocalData {
 	
-	// Per-thread variables - Must be synchronized thru locking K.gLocalData
+	// Per-thread variables - Must be synchronized by the accessing thread - see K.getLocalData()
 	String				threadName	= null;
 	ArrayList<String>	kLastErrors	= new ArrayList<>(K.MAX_SAVED_ERRORS);
 

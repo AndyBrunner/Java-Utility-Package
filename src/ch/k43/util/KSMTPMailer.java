@@ -58,6 +58,7 @@ public class KSMTPMailer {
 	private String					gBCCAddresses			= null;
 	private String					gReplyToAddress			= null;
 	private String					gSMTPHostName			= null;
+	private String					gLocalFQDNHostName		= null;
 	private String					gUserName				= null;
 	private String					gUserPassword			= null;
 	private String					gUnsubscribe			= null;
@@ -222,6 +223,11 @@ public class KSMTPMailer {
 		// Setup session properties
 		//
 		Properties sessionProps = new Properties();
+		
+		// 2025.04.27 Set local host name if specified
+		if (gLocalFQDNHostName != null) {
+	        sessionProps.put("mail.smtp.localhost", gLocalFQDNHostName);
+		}
 		
 		// SMTP host name if none was set previously
 		if (gSMTPHostName == null) {
@@ -431,6 +437,17 @@ public class KSMTPMailer {
 	}
 	
 	/**
+	 * Set local FQDN host names to be used in SMTP HELO/EHLO message. If not specified, the current configured local host name is taken.
+	 * 
+	 * @param argLocalHostName	Local FQDN host name
+	 * 
+	 * @since 2025.04.27
+	 */
+	public void setLocalFQDNHostName(String argLocalHostName) {
+		gLocalFQDNHostName = argLocalHostName;
+	}
+	
+	/**
 	 * Set user name and access token for OAuth 2.0 authentication. The access token must previously been obtained from the
 	 * authorization server of the hosting provider.
 	 * 
@@ -533,23 +550,6 @@ public class KSMTPMailer {
 	}
 	
 	/**
-	 * String representation of object.
-	 * 
-	 * @since 2024.08.23
-	 */
-	@Override
-	public String toString() {
-		return "KSMTPMailer [gMimeMultipart=" + gMimeMultipart + ", gJakartaMailLog=" + gJakartaMailLog
-				+ ", gLastErrorMessage=" + gLastErrorMessage + ", gSubject=" + gSubject + ", gSubjectCharSet="
-				+ gSubjectCharSet + ", gFromAddress=" + gFromAddress + ", gToAddresses=" + gToAddresses
-				+ ", gCCAddresses=" + gCCAddresses + ", gBCCAddresses=" + gBCCAddresses + ", gReplyToAddress="
-				+ gReplyToAddress + ", gSMTPHostName=" + gSMTPHostName + ", gUserName=" + gUserName + ", gUserPassword="
-				+ gUserPassword + ", gUnsubscribe=" + gUnsubscribe + ", gSMTPHostPort=" + gSMTPHostPort
-				+ ", gMimeMessageSize=" + gMimeMessageSize + ", gSecureConnection=" + gSecureConnection
-				+ ", gMultiPartAdded=" + gMultiPartAdded + ", gOAuth2Authentication=" + gOAuth2Authentication + "]";
-	}
-
-	/**
 	 * Write Jakarta log to KLog
 	 * 
 	 * @since 2024.06.03
@@ -579,5 +579,23 @@ public class KSMTPMailer {
 		}
 		
 		gJakartaMailLog = null;
+	}
+
+	/**
+	 * String representation of object.
+	 * 
+	 * @since 2024.08.23
+	 */
+	@Override
+	public String toString() {
+		return "KSMTPMailer [gMimeMultipart=" + gMimeMultipart + ", gJakartaMailLog=" + gJakartaMailLog
+				+ ", gLastErrorMessage=" + gLastErrorMessage + ", gSubject=" + gSubject + ", gSubjectCharSet="
+				+ gSubjectCharSet + ", gFromAddress=" + gFromAddress + ", gToAddresses=" + gToAddresses
+				+ ", gCCAddresses=" + gCCAddresses + ", gBCCAddresses=" + gBCCAddresses + ", gReplyToAddress="
+				+ gReplyToAddress + ", gSMTPHostName=" + gSMTPHostName + ", gLocalFQDNHostName=" + gLocalFQDNHostName
+				+ ", gUserName=" + gUserName + ", gUserPassword=" + gUserPassword + ", gUnsubscribe=" + gUnsubscribe
+				+ ", gSMTPHostPort=" + gSMTPHostPort + ", gMimeMessageSize=" + gMimeMessageSize + ", gSecureConnection="
+				+ gSecureConnection + ", gMultiPartAdded=" + gMultiPartAdded + ", gOAuth2Authentication="
+				+ gOAuth2Authentication + "]";
 	}
 }

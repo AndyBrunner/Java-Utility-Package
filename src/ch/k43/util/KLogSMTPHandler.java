@@ -232,7 +232,7 @@ public class KLogSMTPHandler extends Handler {
 		
 		mailer.addHTML("<h2>Error Report</h2>"
 				+ "The following error has occurred:<p>"
-				+ "<b>" + traceMessage + "</b><p>"
+				+ "<b>" + K.truncateMiddle(traceMessage, KLog.MAX_LOG_DATA) + "</b><p>"
 				+ "Time:<br>"
 				+ K.getTimeISO8601() + "<p>"
 				+ "Code Location:<br>"

@@ -14,9 +14,11 @@ import javax.net.ssl.SSLServerSocket;
  * 
  * Notes:<br>
  * - This class is started as a separate thread by KSocketServer.<br>
- * - For each client connection, this class will start a separate user thread (subclass of KSocketServerThread).<br>
+ * - For each client connection, this class will start a separate user thread (subclass of KSocketServerThread or KHTTPServerThread).<br>
  * 
  * @see KSocketServerThread
+ * @see KHTTPServerThread
+ * 
  */
 class KSocketServerListener extends Thread implements AutoCloseable {
 

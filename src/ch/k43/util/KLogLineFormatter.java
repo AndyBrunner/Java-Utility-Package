@@ -79,14 +79,18 @@ public class KLogLineFormatter extends Formatter {
 			traceLocation	= gLastTraceLocation;
 		}
 
-		logString.append(String.format(FORMAT_LOCATION_STRING, K.truncateMiddle(traceLocation, MAX_CODE_LOCATION_SIZE)));
-		
 		// Format the passed log message
 		if (logSevere) {
 			traceMessage = ERROR_PREFIX + traceMessage;
 		}
+
+		logString.append(String.format(FORMAT_LOCATION_STRING, K.truncateMiddle(traceLocation, MAX_CODE_LOCATION_SIZE)));
 		
-		logString.append(traceMessage);
+		if (traceMessage.length() > KLog.MAX_LOG_DATA) {
+			logString.append(traceMessage.substring(0, KLog.MAX_LOG_DATA - 3)).append("...");
+		} else {
+			logString.append(traceMessage);
+		}
 		
 		// Return formatted message
 		return (logString.toString() + K.LINE_SEPARATOR);

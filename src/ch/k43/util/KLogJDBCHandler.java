@@ -89,7 +89,7 @@ public class KLogJDBCHandler extends Handler {
 					"LOGTIME TIMESTAMP, " +
 					"LEVEL VARCHAR(20), " +
 					"LOCATION VARCHAR(80), " +
-					"TEXT VARCHAR(500))")) {
+					"TEXT VARCHAR(" + KLog.MAX_LOG_DATA + "))")) {
 				logError(gJDBC.getErrorMessage());
 				return;
 			} else {
@@ -228,7 +228,7 @@ public class KLogJDBCHandler extends Handler {
 					"'" + K.getTimeISO8601() + "'," +
 					"'" + logLevel.trim() + "'," +
 					"'" + String.format("%-80s", traceLocation).trim() + "'," +
-					"'" + String.format("%-500s", traceMessage).trim() + "')")) {
+					"'" + String.format("%-s", K.truncateMiddle(traceMessage, KLog.MAX_LOG_DATA)).trim() + "')")) {
 			logError(gJDBC.getErrorMessage());
 		} else {
 			logDebug("Log data written to database");

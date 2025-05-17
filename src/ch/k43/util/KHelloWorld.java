@@ -19,7 +19,9 @@ public class KHelloWorld {
 		System.out.println("Java Utility Package (Freeware) Version " + K.VERSION);
 		
 		if (!KLog.isActive()) {
-			System.out.println("Note: To enable logging, place a valid KLog.properties file in the current directory");
+			System.out.println("Note: To enable logging, place a valid KLog.properties file in the current directory (or use the -DKLogPropertyFile startup parameter)");
+		} else {
+			System.out.println("Note: Logging is configured in property file " + KLog.PROPERTY_FILE);
 		}
 
 		System.out.println("JVM version " + K.JVM_MAJOR_VERSION + " running on " + K.JVM_PLATFORM);

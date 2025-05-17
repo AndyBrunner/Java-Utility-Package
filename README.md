@@ -1,6 +1,6 @@
 # Java Utility Package (Open Source)
 
-## A high-performance and user-friendly programming toolkit tailored for Java back-end developers
+## A high-performance and user-friendly toolkit tailored for developing small to medium-sized back-end applications
 
 ---
 

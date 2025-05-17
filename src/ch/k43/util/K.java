@@ -52,9 +52,9 @@ public class K {
 	// Public constants
 	//
 	/**
-	 * Package version number. Example is "2025.01.24".
+	 * Package version number in the format yyyy.mm.dd.
 	 */
-	public static final		String				VERSION				= "2025.04.26";			// Also change docs/version-check/version.txt
+	public static final		String				VERSION				= "2025.05.17";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
@@ -720,7 +720,7 @@ public class K {
     	// Return encoded buffer
     	return Base64.getEncoder().encodeToString(argBuffer);
 	}
-	
+		
 	/**
 	 * Return encoded string for CSV with the delimiter ','
 	 * 
@@ -732,7 +732,7 @@ public class K {
 	public static String encodeCSV(String argBuffer) {
 		return (encodeCSV(argBuffer, ','));
 	}
-		
+	
 	/**
 	 * Return encoded string for CSV
 	 * 
@@ -833,7 +833,7 @@ public class K {
 	public static String encodeJSON(String argBuffer) {
 		return (encodeJSON(argBuffer, true));
 	}
-	
+
 	/**
 	 * Return encoded string for JSON.
 	 * 
@@ -884,7 +884,7 @@ public class K {
 		// Return enclosed string
 		return '"' + jsonString + '"';
     }
-
+	
 	/**
 	 * Return encoded string in UTF-8
 	 * 
@@ -906,7 +906,7 @@ public class K {
         	return "";
         }
     }
-	
+
 	/**
 	 * Encode string for XML
 	 * 
@@ -933,7 +933,7 @@ public class K {
 
 		return xmlString;
     }
-
+	
 	/**
 	 * Return encoded string for YAML. The returned string is always enclosed in double quotes.
 	 * 
@@ -1096,11 +1096,13 @@ public class K {
 
 		return String.format("%d B", (long) argSizeInBytes);
 	}
-	
+
 	/**
-	 * Return compute Hash (MD5, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-384 or SHA3-512)
+	 * Return compute Hash (MD5, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-384 or SHA3-512).
+	 * 
 	 * @param	argHashType	Hash algorithm
 	 * @param	argBuffer	argBuffer to hash
+	 * 
 	 * @return	byte[]		Hashed data
 	 */
 	public static byte[] generateHash(String argHashType, byte[] argBuffer) {
@@ -1136,7 +1138,7 @@ public class K {
 			return new byte[0];
 		}
 	}
-
+	
 	/**
 	 * Generate RSA-4096 public/private key pair.
 	 * 
@@ -1393,7 +1395,7 @@ public class K {
 		
 		return memoryStats;
 	}
-	
+		
 	/**
 	 * Return JVM name (Example "OpenJDK 64-Bit Server VM - Eclipse Adoptium").
 	 * 
@@ -1404,7 +1406,7 @@ public class K {
 	public static String getJVMName() {
 		return JVM_VERSION_NAME;
 	}
-		
+	
 	/**
 	 * Return JVM platform (Example: "Mac OS X (Version 14.5/aarch64)").
 	 * 
@@ -1481,7 +1483,7 @@ public class K {
 	 */
 	static synchronized KLocalData getLocalData() {
 		
-		// Remove local data objects if owning thread is no longer active
+		// Remove local data objects if owning thread if no longer active
 		for (Map.Entry<Thread, KLocalData> entry : gLocalData.entrySet()) {
 				
 		    Thread thread = entry.getKey();
@@ -1518,7 +1520,7 @@ public class K {
 			return "";
 		}
 	}
-	
+
 	/**
 	 * Return local TCP/IP host name
 	 * 
@@ -1533,7 +1535,7 @@ public class K {
 			return "";
 		}
 	}
-
+	
 	/**
 	 * Generate hash from password with salt. The hashing is repeated for the number of iterations with SHA3-512(password + salt).
 	 *
@@ -1544,7 +1546,10 @@ public class K {
 	 * @return Hashed password (64 bytes)
 	 * 
 	 * @since 2025.02.15
+	 * 
+	 * @deprecated Use KPasswordVault instead
 	 */
+	@Deprecated
 	public static byte[] getPasswordHash(byte[] argPassword, byte[] argSalt, int argIteration) {
 
 		// Declarations
@@ -1586,7 +1591,10 @@ public class K {
 	 * @return Hashed password (64 bytes)
 	 * 
 	 * @since 2025.02.15
+	 * 
+ 	 * @deprecated Use KPasswordVault instead
 	 */
+	@Deprecated
 	public static byte[] getPasswordHash(String argPassword, String argSalt) {
 		
 		// Check arguments
@@ -2362,7 +2370,7 @@ public class K {
 	}
 	
 	/**
-	 * Format byte array as hexadecimal string.
+	 * Returns byte array as hexadecimal string.
 	 * 
 	 * @param	argBytes	Byte array
 	 * @return	Hexadecimal string
@@ -2615,6 +2623,7 @@ public class K {
 	            }
 	        	
 	        	return pemString.toString();
+	        	
 	        } else {
 	            KLog.argException("K.toPEM(): Unsupported object type {}", argObject.getClass().getName());
 	            return "";
@@ -2653,7 +2662,7 @@ public class K {
 	}
 	
 	/**
-	 * Truncate string by replacing characters from the middle.
+	 * Returns truncated string by replacing characters from the middle.
 	 * 
 	 * @param	argString		String to be shortened
 	 * @param	argMaxLength	Maximum string length
@@ -2678,7 +2687,7 @@ public class K {
         int ellipsisLength	= argEllipsis.length();
         int partLength		= (argMaxLength - ellipsisLength) / 2;
         
-        // Add 1 extra character to the start part if maximum string length is uneven
+        // Add 1 extra character to the start part if maximum string length is odd
         int adjustLength = (argMaxLength - ellipsisLength) % 2;
                         
         String start	= argString.substring(0, partLength + adjustLength);
@@ -2690,7 +2699,7 @@ public class K {
 	/**
 	 *	Waits the specified time.
 	 *
-	 *	@param	argHours				Number of hours to wait
+	 *	@param	argHours Number of hours to wait
 	 */
 	public static void waitHours(int argHours) {
 		waitThread(argHours * 3_600_000L);
