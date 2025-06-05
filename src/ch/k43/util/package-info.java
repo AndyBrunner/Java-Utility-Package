@@ -67,6 +67,15 @@
  * mailer.addFile("test.txt");
  * mailer.addText("Regards, John");
  * mailer.send();
+ * 
+ * <b>5. Password Vault</b>
+ * 
+ * KPasswordVault vault = new KPasswordVault("Pa$$w0rd");
+ *
+ * System.out.println("Password hash: " + K.toHex(vault.getPasswordHash()));
+ * System.out.println("Password salt: " + K.toHex(vault.getSalt()));
+ * System.out.println("Iterations:    " + vault.getIterations());
+ * System.out.println("Hashing time:  " + vault.getHashTimeMs() + " ms");
  * </pre>
  *  
  * @author andy.brunner@k43.ch

@@ -54,7 +54,7 @@ public class K {
 	/**
 	 * Package version number in the format yyyy.mm.dd.
 	 */
-	public static final		String				VERSION				= "2025.05.17";			// Also change docs/version-check/version.txt
+	public static final		String				VERSION				= "2025.06.05";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
@@ -257,6 +257,32 @@ public class K {
 	}
 
 	/**
+	 * Clear the given array be overwriting it with zeroes.
+	 * 
+	 * @param argArray	Array to be cleared
+	 * 
+	 * @since 2025.05.18
+	 */
+	public static void clear(char[] argArray) {
+		if (argArray != null) {
+			Arrays.fill(argArray, '\0');
+		}
+	}
+	
+	/**
+	 * Clear the given array be overwriting it with zeroes.
+	 * 
+	 * @param argArray	Array to be cleared
+	 * 
+	 * @since 2025.05.18
+	 */
+	public static void clear(byte[] argArray) {
+		if (argArray != null) {
+			Arrays.fill(argArray, (byte) 0);
+		}
+	}
+	
+	/**
 	 * Compress the passed data using the GZIP algorithm.
 	 * 
 	 * @param argBuffer Data to be compressed
@@ -327,6 +353,70 @@ public class K {
 	    } finally {
 	    	deflater.end();
 	    }
+	}
+	
+	/**
+	 * Concatenate two byte arrays.
+	 * 
+	 * @param arg1	First array
+	 * @param arg2	Second array
+	 * 
+	 * @return	Concatenated array
+	 * 
+	 * @since 2025.05.17
+	 */
+	public static byte[] concat(byte[] arg1, byte[] arg2) {
+		
+		// Check arguments
+		KLog.argException(arg1 == null && arg2 == null, "K.concat(): arg1 and arg2 cannot be both null");
+
+		if (arg1 != null && arg2 == null) {
+			return arg1;
+		}
+		
+		if (arg1 == null && arg2 != null) {
+			return arg2;
+		}
+		
+		// Concatenate the arrays 
+		byte[] concatResult = new byte[arg1.length + arg2.length];
+		
+        System.arraycopy(arg1, 0, concatResult, 0, arg1.length);
+        System.arraycopy(arg2, 0, concatResult, arg1.length, arg2.length);
+        
+        return concatResult;
+	}
+	
+	/**
+	 * Concatenate two char arrays.
+	 * 
+	 * @param arg1	First array
+	 * @param arg2	Second array
+	 * 
+	 * @return	Concatenated array
+	 * 
+	 * @since 2025.05.17
+	 */
+	public static char[] concat(char[] arg1, char[] arg2) {
+		
+		// Check arguments
+		KLog.argException(arg1 == null && arg2 == null, "K.concat(): arg1 and arg2 cannot be both null");
+
+		if (arg1 != null && arg2 == null) {
+			return arg1;
+		}
+		
+		if (arg1 == null && arg2 != null) {
+			return arg2;
+		}
+
+		// Concatenate the arrays 
+		char[] concatResult = new char[arg1.length + arg2.length];
+		
+        System.arraycopy(arg1, 0, concatResult, 0, arg1.length);
+        System.arraycopy(arg2, 0, concatResult, arg1.length, arg2.length);
+        
+        return concatResult;
 	}
 	
 	/**
@@ -1806,6 +1896,29 @@ public class K {
 	 */
 	public static int getUTCOffsetMin() {
 		return (Calendar.getInstance().getTimeZone().getOffset(new Date().getTime()) / 1_000 / 60);
+	}
+	
+	/**
+	 * Convert hexadecimal formatted string to byte array.
+	 * 
+	 * @param 	argHexString	Hexadecimal formatted string
+	 * @return	Byte array
+	 * 
+	 * @since 2025.06.04
+	 */
+	public static byte[] hexToBytes(String argHexString) {
+
+		// Check argument
+	    KLog.argException(K.isEmpty(argHexString) || argHexString.length() % 2 != 0, "K.hexToBytes(): Hex string must have an even length");
+
+	    int		hexLength	= argHexString.length();
+	    byte[]	data		= new byte[hexLength / 2];
+	    
+	    for (int index = 0; index < hexLength; index += 2) {
+	        data[index / 2] = (byte) ((Character.digit(argHexString.charAt(index), 16) << 4) + Character.digit(argHexString.charAt(index + 1), 16));
+	    }
+	    
+	    return data;
 	}
 	
 	/**

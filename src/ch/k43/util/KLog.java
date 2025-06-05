@@ -284,65 +284,69 @@ public class KLog {
 	 * @param	argExpression	Any expression
 	 * @param	argMessage		Message to be logged
 	 * @param	argObjects		Optional arguments for {} parameters 
+	 * @throws	RuntimeException Explicit exception
 	 */
 	public static void abort(boolean argExpression, String argMessage, Object... argObjects) {
 
 		// Check if anything to log
-		if ((!argExpression) || (K.isEmpty(argMessage))) {
+		if (!argExpression) {
 			return;
 		}
-		
+
 		// Replace {} parameters if present
-		String workString = K.replaceParams(argMessage, argObjects);
+		String workString = K.isEmpty(argMessage) ? "KLog.abort(): No error message" : K.replaceParams(argMessage, argObjects);
 		
 		// Save error message even if logging is not active
 		K.saveError(workString);
 		
-		// Check if logging is active
-		if (!isActive()) {
-			return;
-		}
-
-		// Format and write log message with code location
-		write(Level.SEVERE, formatLogMessage(workString));
-
-		// Log and throw exception
+		// Create unchecked exception
 		RuntimeException runtimeException = new RuntimeException(workString);
-		logStackTrace(runtimeException);
+		
+		// Log error and exception
+		if (isActive()) {
+			write(Level.SEVERE, formatLogMessage(workString));
+			logStackTrace(runtimeException);
+		}
+		
+		// Throw exception
 		throw runtimeException;
 	}
 	
 	/**
-	 * Log error message and throws an unchecked RuntimeException.<br>
+	 * Log error message and throws an unchecked RuntimeException.
+	 * 
+	 * @param	argException	Exception to be logged
+	 * @throws	RuntimeException Explicit exception
+	 * 
+	 * @since 2025.05.19
+	 */
+	public static void abort(Exception argException) {
+		
+		// Check arguments
+		Exception exception = (argException == null) ? new Exception("KLog.abort(): argException must not be empty") : argException;
+		
+		// Save error message even if logging is not active
+		K.saveError(exception.toString());
+		
+		// Log error and exception
+		if (isActive()) {
+			write(Level.SEVERE, formatLogMessage(exception.toString()));
+			logStackTrace(exception);
+		}
+		
+		// Throw exception
+		throw new RuntimeException(exception.toString());
+	}
+	
+	/**
+	 * Log error message and throws an unchecked RuntimeException.
 	 * 
 	 * @param	argMessage		Message to be logged
 	 * @param	argObjects		Optional arguments for {} parameters 
+	 * @throws	RuntimeException Explicit exception
 	 */
 	public static void abort(String argMessage, Object... argObjects) {
-		
-		// Check if anything to log
-		if (K.isEmpty(argMessage)) {
-			return;
-		}
-		
-		// Replace {} parameters if present
-		String workString = K.replaceParams(argMessage, argObjects);
-		
-		// Save error message even if logging is not active
-		K.saveError(workString);
-		
-		// Check if logging is active
-		if (!isActive()) {
-			return;
-		}
-
-		// Format and write log message with code location
-		write(Level.SEVERE, formatLogMessage(workString));
-
-		// Log and throw exception
-		RuntimeException runtimeException = new RuntimeException(workString);
-		logStackTrace(runtimeException);
-		throw runtimeException;
+		abort(true, argMessage, argObjects);
 	}
 	
 	/**
@@ -358,28 +362,27 @@ public class KLog {
 	public static void argException(boolean argExpression, String argMessage, Object... argObjects) {
 		
 		// Check if anything to log
-		if ((!argExpression) || (K.isEmpty(argMessage))) {
+		if (!argExpression) {
 			return;
 		}
-		
+
 		// Replace {} parameters if present
-		String workString = K.replaceParams(argMessage, argObjects);
+		String workString = K.isEmpty(argMessage) ? "KLog.argException(): No error message" : K.replaceParams(argMessage, argObjects);
 		
 		// Save error message even if logging is not active
 		K.saveError(workString);
 		
-		// Check if logging is active
-		if (!isActive()) {
-			return;
+		// Create unchecked exception
+		IllegalArgumentException illegalArgumentException = new IllegalArgumentException(workString);
+		
+		// Log error and exception
+		if (isActive()) {
+			write(Level.SEVERE, formatLogMessage(workString));
+			logStackTrace(illegalArgumentException);
 		}
 		
-		// Format and write log message with code location
-		write(Level.SEVERE, formatLogMessage(workString));
-		
-		// Create, format and throw unchecked exception
-		IllegalArgumentException exception = new IllegalArgumentException(workString);
-		logStackTrace(exception);
-		throw exception;
+		// Throw exception
+		throw illegalArgumentException;
 	}
 	
 	/**
@@ -392,30 +395,7 @@ public class KLog {
 	 * @since 2025.03.16
 	 */
 	public static void argException(String argMessage, Object... argObjects) {
-		
-		// Check if anything to log
-		if (K.isEmpty(argMessage)) {
-			return;
-		}
-		
-		// Replace {} parameters if present
-		String workString = K.replaceParams(argMessage, argObjects);
-		
-		// Save error message even if logging is not active
-		K.saveError(workString);
-		
-		// Check if logging is active
-		if (!isActive()) {
-			return;
-		}
-		
-		// Format and write log message with code location
-		write(Level.SEVERE, formatLogMessage(workString));
-		
-		// Create, format and throw unchecked exception
-		IllegalArgumentException exception = new IllegalArgumentException(workString);
-		logStackTrace(exception);
-		throw exception;
+		argException(true, argMessage, argObjects);
 	}
 
 	/**
@@ -747,8 +727,11 @@ public class KLog {
 			
 		int stackPosition = 1;
 		for (StackTraceElement stackTraceElement : stackTraceElements) {
-			write(Level.SEVERE, "Stack[" + stackPosition + "]: " + stackTraceElement.toString());
-			stackPosition++;
+			String stackElement = stackTraceElement.toString();
+			if (!stackElement.contains("ch.k43.util.KLog.")) {
+				write(Level.SEVERE, "Stack[" + stackPosition + "]: " + stackElement);
+				stackPosition++;
+			}
 		}
 	}
 

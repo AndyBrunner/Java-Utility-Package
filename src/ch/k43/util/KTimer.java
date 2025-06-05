@@ -16,14 +16,14 @@ import java.util.Calendar;
 public class KTimer {
 
 	// Class variables
-	private Calendar gStartTime	= null;
+	private Calendar	gStartDateTime	= null;
+	private long		gStartTimeNs	= 0;
 	
 	/**
 	 * Start a timer.
 	 */
 	public KTimer() {
-		// Save current date and time
-		gStartTime = Calendar.getInstance();
+		reset();
 	}
 
 	/**
@@ -31,11 +31,21 @@ public class KTimer {
 	 * 
 	 * @return	Elapsed time in milliseconds
 	 */
-	public synchronized long getElapsedMilliseconds() {
-		
-		// Return elapsed time in milliseconds
-		return Calendar.getInstance().getTimeInMillis() - gStartTime.getTimeInMillis();
+	public long getElapsedMilliseconds() {
+		return (System.nanoTime() - gStartTimeNs) / 1_000_000;
 	}
+
+	/**
+	 * Return elapsed time in nanoseconds.
+	 * 
+	 * @return	Elapsed time in nanoseconds
+	 * 
+	 * @since 2025.05.19
+	 */
+	public long getElapsedNanoseconds() {
+		return System.nanoTime() - gStartTimeNs;
+	}
+
 	
 	/**
 	 * Return start time.
@@ -45,7 +55,7 @@ public class KTimer {
 	 * @since 2024.05.28
 	 */
 	public Calendar getStartTime() {
-		return gStartTime;
+		return gStartDateTime;
 	}
 
 	/**
@@ -56,11 +66,9 @@ public class KTimer {
 	 * @since 2025.01.28
 	 */
 	public synchronized Calendar reset() {
-		
-		// Set new start time
-		gStartTime = Calendar.getInstance();
-		
-		return gStartTime;
+		gStartTimeNs	= System.nanoTime();
+		gStartDateTime	= Calendar.getInstance();
+		return gStartDateTime;
 	}
 	
 	/**
@@ -70,6 +78,6 @@ public class KTimer {
 	 */
 	@Override
 	public String toString() {
-		return "KTimer [gStartTime=" + gStartTime + "]";
+		return "KTimer [gStartDateTime=" + gStartDateTime + ", gStartTimeNs=" + gStartTimeNs + "]";
 	}
 }
