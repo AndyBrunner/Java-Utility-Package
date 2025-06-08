@@ -1,9 +1,9 @@
 /**
  * <h2>Java Utility Package (Open Source)</h2><p>
  * 
- * <b>A high-performance and user-friendly toolkit tailored for developing small to medium-sized back-end applications</b><p>
+ * <b>A high-performance and user-friendly toolkit tailored for developing small to medium-sized back-end applications</b>
  * 
- * This package holds all classes used by the Java Utility Package. The full documentation with examples can be found on <a href="https://java-util.k43.ch">java-util.k43.ch</a>
+ * <h2>The full documentation with examples can be found on <a href="https://java-util.k43.ch">java-util.k43.ch</a></h2>
  * 
  * <pre>
  * <b>1. Logging Example</b>
