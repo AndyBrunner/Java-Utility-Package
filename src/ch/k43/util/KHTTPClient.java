@@ -291,7 +291,7 @@ public class KHTTPClient {
 	private boolean xmit(String argHTTPMethod, String argURL, Properties argHeaders, byte[] argPayload) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argURL),  "KHTTPClient.xmit(): URL is required");
+		KLog.argException(K.isEmpty(argURL),  "KHTTPClient.xmit(): argURL must not be empty");
 		
 		// Declarations
 		HttpURLConnection 	connection		= null;

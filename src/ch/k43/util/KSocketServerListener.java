@@ -51,8 +51,8 @@ class KSocketServerListener extends Thread implements AutoCloseable {
 	public KSocketServerListener(ServerSocket argServerSocket, String argClassName) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argServerSocket), "KSocketServerListener(): Server socket is required");
-		KLog.argException(K.isEmpty(argClassName), "KSocketServerListener(): Class name is required");
+		KLog.argException(K.isEmpty(argServerSocket), "KSocketServerListener(): argServerSocket must not be empty");
+		KLog.argException(K.isEmpty(argClassName), "KSocketServerListener(): argClassName must not be empty");
 		
 		// Save passed server socket
 		gServerSocket = argServerSocket;

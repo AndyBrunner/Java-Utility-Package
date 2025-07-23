@@ -102,7 +102,7 @@ public final class KPasswordVault {
 		// Hash password with salt
 		gPasswordHash = hashPassword(argPassword, gSalt, gIterations, argPepper);
 		
-		KLog.debug("Password hashed ({}, {} byte salt{}, {} bits key size, {} iterations, {} ms)",
+		KLog.debug("Password hashed ({}, {} byte salt{}, {} bit key size, {} iterations, {} ms)",
 				HASH_ALGORITHM,
 				SALT_SIZE_BYTES,
 				!K.isEmpty(argPepper) ? " (plus pepper)" : "",
@@ -116,6 +116,7 @@ public final class KPasswordVault {
 	 */
 	public final void clear() {
 		
+		// Overwrite variables with zeroes
 		if (!K.isEmpty(gSalt)) {
 			Arrays.fill(gSalt, (byte) 0);
 		}
@@ -124,6 +125,7 @@ public final class KPasswordVault {
 			Arrays.fill(gPasswordHash, (byte) 0);
 		}
 
+		// Reset variables
 		gSalt			= null;
 		gIterations		= -1;
 		gPasswordHash	= null;
@@ -142,7 +144,10 @@ public final class KPasswordVault {
 		
 		// Check arguments
 		KLog.argException(K.isEmpty(arg1) || K.isEmpty(arg2), "KPasswordVault.constantTimeCompare(): arg1 and arg2 must not be empty");
-		KLog.argException(arg1.length != arg2.length, "KPasswordVault.constantTimeCompare(): arg1 and arg2 must have the same length");
+
+		if (arg1.length != arg2.length) {
+			return false;
+		}
 
 		// Compare all bytes to avoid premature return
 	    int result = 0;

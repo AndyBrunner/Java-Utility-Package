@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.net.IDN;
 import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -44,7 +45,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.naming.directory.*;
 
 /**
- * Static class with many utility methods. 
+ * Static class with a bunch of utility methods. 
  */
 public class K {
 	
@@ -54,7 +55,7 @@ public class K {
 	/**
 	 * Package version number in the format yyyy.mm.dd.
 	 */
-	public static final		String				VERSION				= "2025.06.05";			// Also change docs/version-check/version.txt
+	public static final		String				VERSION				= "2025.07.23";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
@@ -191,7 +192,7 @@ public class K {
 	private static final 	String				SHA_256				= "SHA-256";
 
 	//
-	// Private class variables
+	// Private class variables. This structure is created whenever a static function need to store local data per thread.
 	//
 	private static ConcurrentHashMap<Thread, KLocalData>	gLocalData			= new ConcurrentHashMap<>(1);		
 
@@ -257,7 +258,7 @@ public class K {
 	}
 
 	/**
-	 * Clear the given array be overwriting it with zeroes.
+	 * Clear the given array be overwriting it with zeroes. This method is mainly used to clear sensitive data (e.g. passwords) in memory.
 	 * 
 	 * @param argArray	Array to be cleared
 	 * 
@@ -270,7 +271,7 @@ public class K {
 	}
 	
 	/**
-	 * Clear the given array be overwriting it with zeroes.
+	 * Clear the given array be overwriting it with zeroes. This method is mainly used to clear sensitive data (e.g. passwords) in memory.
 	 * 
 	 * @param argArray	Array to be cleared
 	 * 
@@ -2087,6 +2088,41 @@ public class K {
 	}
 	
 	/**
+	 * Check if given string is a valid DNS host name.
+	 * 
+	 * @param argHostName	Host name to be tested
+	 * @return	True if valid host name, false otherwise
+	 * 
+	 * @since 2025.07.21
+	 */
+	public static boolean isValidHostName(String argHostName) {
+		
+	    // Check argument
+	    if (K.isEmpty(argHostName)) {
+	        return false;
+	    }
+
+	    try {
+	        // Convert to ASCII
+	        String asciiHostName = IDN.toASCII(argHostName);
+
+	        // Remove trailing dot for validation, but keep original for length check
+	        String normalized = asciiHostName.endsWith(".") ? asciiHostName.substring(0, asciiHostName.length() - 1) : asciiHostName;
+
+	        // Length check: max 253 chars (254 if trailing dot)
+	        if (normalized.length() > 253) {
+	            return false;
+	        }
+
+	        // Check host name
+	        return normalized.matches("^(?=.{1,253}$)(?!-)([a-zA-Z0-9-]{1,63})(?<!-)(\\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*$");
+	        
+	    } catch (IllegalArgumentException e) {
+	        return false;
+	    }
+	}
+	
+	/**
 	 * Dynamic load a Java class
 	 * 
 	 * @param	argClassName	Java class name, e.g ch.k43.util.KSocketServerSample
@@ -2872,7 +2908,7 @@ public class K {
 	 */
 	private K() {
 	}
-
+	
 	/**
 	 * String representation of object.
 	 * 
