@@ -2,6 +2,7 @@ package ch.k43.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
@@ -23,6 +24,9 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -55,7 +59,7 @@ public class K {
 	/**
 	 * Package version number in the format yyyy.mm.dd.
 	 */
-	public static final		String				VERSION				= "2025.07.23";			// Also change docs/version-check/version.txt
+	public static final		String				VERSION				= "2025.09.02";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
@@ -1580,7 +1584,7 @@ public class K {
 		    Thread thread = entry.getKey();
 
 		    if (!thread.isAlive()) {
-				KLog.debug("Local data of thread {} removed", entry.getValue().threadName);
+				KLog.debug("Local data from thread {} removed", entry.getValue().threadName);
 				gLocalData.remove(thread);
 			}
 		} 
@@ -1591,7 +1595,7 @@ public class K {
 		if (localData == null) {
 			localData = new KLocalData(Thread.currentThread().getName());
 			gLocalData.put(Thread.currentThread(), localData);
-			KLog.debug("Local data of thread {} created", localData.threadName);
+			KLog.debug("Local data for thread {} created", localData.threadName);
 		}
 
 		return localData;
@@ -1831,11 +1835,25 @@ public class K {
 	 * @return	String	ISO 8601 date/time
 	 */
 	public static String getTimeISO8601() {
-		
-		// Return current date/time in ISO 8601 format (e.g. 2024-02-24T14:12:44.234)
-		return getTimeISO8601(Calendar.getInstance());
+        return getTimeISO8601(LocalDateTime.now());
 	}
 
+	/**
+	 * Return date and time in ISO 8601 format (Example: "2024-02-24T14:12:44.234").
+	 * 
+	 * @param 	argDateTime Date time
+	 * @return	String	ISO 8601 date/time
+	 * 
+	 * @since 2025.07.24
+	 */
+	public static String getTimeISO8601(LocalDateTime argDateTime) {
+
+		// Check argument
+		KLog.argException(K.isEmpty(argDateTime), "K.getTimeISO8601(): argDateTime is required");
+		
+        return argDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"));
+	}
+	
 	/**
 	 * Return date and time in ISO 8601 format (Example: "2024-02-24T14:12:44.234").<br>
 	 * 
@@ -1846,16 +1864,11 @@ public class K {
 		
 		// Check argument
 		KLog.argException(K.isEmpty(argDateTime), "K.getTimeISO8601(): argDateTime is required");
-		
-		// Return date/time in ISO 8601 format (e.g. 2024-02-24T14:12:44.234)
-		return String.format("%04d-%02d-%02dT%02d:%02d:%02d.%03d",
-				argDateTime.get(Calendar.YEAR),
-				argDateTime.get(Calendar.MONTH) + 1,
-				argDateTime.get(Calendar.DAY_OF_MONTH),
-				argDateTime.get(Calendar.HOUR_OF_DAY),
-				argDateTime.get(Calendar.MINUTE),
-				argDateTime.get(Calendar.SECOND),
-				argDateTime.get(Calendar.MILLISECOND));
+
+		// Convert to local zoned date and time
+	    ZonedDateTime zonedDateTime = argDateTime.toInstant().atZone(argDateTime.getTimeZone().toZoneId());
+
+        return DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(zonedDateTime);
 	}
 	
 	/**
@@ -2012,6 +2025,22 @@ public class K {
 		} catch(Exception e){  
 		    return false;  
 		} 
+	}
+	
+	/**
+	 * Check if package version is at least at the given version number.
+	 * 
+	 * @param	argVersion	Minimum version, e.g. "2025.08.30"
+	 * @return	True if success or false otherwise
+	 * 
+	 * @since 2025.08.25
+	 */
+	public static boolean isMinumumVersion(String argVersion) {
+
+		// Check argument
+		KLog.argException(K.isEmpty(argVersion) || argVersion.length() != 10, "K.isMinimumVersion(): Version number must be 10 character (e.g. 2025.08.30)");
+		
+		return (argVersion.compareTo(K.VERSION) <= 0);
 	}
 	
 	/**
@@ -2339,6 +2368,91 @@ public class K {
 
 		return result.toString();
 	}
+
+	/**
+	 * Read line input from console.
+	 * 
+	 * @return	Entered data or empty string ("")
+	 * @since 	2025.08.06
+	 */
+	public static String readConsole() {
+		return readConsole(null, false);
+	}
+	
+	/**
+	 * Write optional prompt and read line input from console.
+	 * 
+	 * @param	argPrompt		Optional prompt to output
+	 * @return	Entered data or empty string ("")
+	 * @since	2025.08.06
+	 */
+	public static String readConsole(String argPrompt) {
+		return readConsole(argPrompt, false);
+	}
+	
+	/**
+	 * Write optional prompt and read line input from console.
+	 * 
+	 * @param	argPrompt		Optional prompt to output
+	 * @param	argHideEcho		Hide echo characters (e.g. for password prompt)
+	 * @return	Entered data or empty string ("")
+	 * @since	2025.08.06
+	 */
+	public static String readConsole(String argPrompt, boolean argHideEcho) {
+		
+        // Check if terminal console is available
+        Console console = System.console();
+        
+		if (console == null) {
+			KLog.error("Console could not be opened");
+            return "";
+        }
+
+		// Write prompt (if given)
+		if (!K.isEmpty(argPrompt)) {
+			KLog.debug("Console prompt: {} ({} characters)", argPrompt, argPrompt.length());
+			System.out.print(argPrompt);
+		}
+		
+		// Get console input
+		String consoleInputString = null;
+
+		try {
+			
+			// Read line from console without echo (e.g. for passwords)
+			if (argHideEcho) {
+
+				char[] input = console.readPassword();
+
+				if (K.isEmpty(input)) {
+					return "";
+				}
+				
+				consoleInputString = new String(input);
+				
+				// Clear hidden input
+				K.clear(input);
+
+				KLog.debug("Console read: (hidden) ({} characters)", consoleInputString.length());
+				return consoleInputString;
+				
+			} else {
+
+				// Read line from console
+				consoleInputString = console.readLine();
+				
+				if (K.isEmpty(consoleInputString)) {
+					return "";
+				}
+
+				KLog.debug("Console read: {} ({} characters)", consoleInputString, consoleInputString.length());
+				return consoleInputString;
+			}
+		} catch (Exception e) {
+			KLog.error("I/O error reading from console: {}", e.toString());
+			return "";
+		}
+	}
 	
 	/**
      * Return rounded value.
@@ -2418,6 +2532,7 @@ public class K {
 		}
 			
 		localData.kLastErrors.add(0, argMessage);
+		KLog.debug("Error message saved: {}", argMessage);
 	}
 	
 	/**

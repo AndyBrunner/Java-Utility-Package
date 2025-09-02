@@ -66,8 +66,8 @@ public class KTimer {
 	 * @since 2025.01.28
 	 */
 	public synchronized Calendar reset() {
-		gStartTimeNs	= System.nanoTime();
 		gStartDateTime	= Calendar.getInstance();
+		gStartTimeNs	= System.nanoTime();
 		return gStartDateTime;
 	}
 	
