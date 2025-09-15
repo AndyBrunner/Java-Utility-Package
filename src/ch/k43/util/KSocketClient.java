@@ -74,8 +74,8 @@ public class KSocketClient implements AutoCloseable{
 	public KSocketClient(String argHostName, int argHostPort, boolean argTLS, String argKeyStoreFileName, char[] argKeyStorePassword) {
 
 		// Check arguments
-		KLog.argException(K.isEmpty(argHostName), "KSocketClient(): Host name is required");
-		KLog.argException(((argHostPort < 1) || (argHostPort > 65535)), "KSocketClient(): Host port must be between 1 and 65535");
+		KLog.argException(K.isEmpty(argHostName), "Host name is required");
+		KLog.argException(((argHostPort < 1) || (argHostPort > 65535)), "Host port must be between 1 and 65535");
 		
 		KLog.debug("Connecting to {}:{} ({}TLS)", argHostName, argHostPort, (!argTLS ? "non-" : ""));
 

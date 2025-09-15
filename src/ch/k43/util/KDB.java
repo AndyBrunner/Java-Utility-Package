@@ -136,8 +136,8 @@ public class KDB implements AutoCloseable{
 		// Declarations
 		KTimer timer = new KTimer();
 
-		KLog.argException(K.isEmpty(argDriverClass), "KDB: JDBC driver class name is required");
-		KLog.argException(K.isEmpty(argURL), "KDB: JDBC connection URL is required");
+		KLog.argException(K.isEmpty(argDriverClass), "JDBC driver class name is required");
+		KLog.argException(K.isEmpty(argURL), "JDBC connection URL is required");
 		
 		// Load the JDBC driver
 		KLog.debug("JDBC driver {}", argDriverClass);
@@ -292,9 +292,9 @@ public class KDB implements AutoCloseable{
 		KTimer timer = new KTimer();
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argStatement), "KDB.exec(): SQL statement is required");
-		KLog.argException(argMaxRows < 0, "KDB.exec(): argMaxRows value is invalid");
-		KLog.argException(argTimeOutSec < 0, "KDB.exec(): argTimeOutSec value is invalid");
+		KLog.argException(K.isEmpty(argStatement), "SQL statement is required");
+		KLog.argException(argMaxRows < 0, "argMaxRows value is invalid");
+		KLog.argException(argTimeOutSec < 0, "argTimeOutSec value is invalid");
 		
 		// Check if database is connected
 		if (!isConnected()) {
@@ -360,7 +360,7 @@ public class KDB implements AutoCloseable{
 		}
 		
 		// Check if SQL statement previously prepared
-		KLog.argException(gPreparedStatement == null, "KDB.execPrepare(): No previous SQL statement prepared thru KDB.prepare()");
+		KLog.argException(gPreparedStatement == null, "No previous SQL statement prepared thru KDB.prepare()");
 		
 		// Clear variables
 		clearTransactionData();
@@ -384,7 +384,7 @@ public class KDB implements AutoCloseable{
 			
 			// Check if correct number of parameters passed
 			int parameterCount = gPreparedStatement.getParameterMetaData().getParameterCount();
-			KLog.argException(parameterCount != argObjects.length, "KDB.execPrepare(): Expected number of arguments: {}", parameterCount);
+			KLog.argException(parameterCount != argObjects.length, "Expected number of arguments: {}", parameterCount);
 
 			//
 			// Replace all '?' SQL placeholder(s) with the passed values
@@ -454,7 +454,7 @@ public class KDB implements AutoCloseable{
 					break;
 							
 				default:
-					KLog.argException(true, "KDB.execPrepare(): Unsupported object type {}", argObject.getClass().getName());
+					KLog.argException(true, "Unsupported object type {}", argObject.getClass().getName());
 					break;
 				}
 					
@@ -556,8 +556,8 @@ public class KDB implements AutoCloseable{
 		KTimer				timer	= new KTimer();
 
 		// Check arguments
-		KLog.argException(argDelimiter == ' ', "KDB.getDataAsCSV(): Non-blank delimiter is required");
-		KLog.argException(argDelimiter == '\"', "KDB.getDataAsCSV(): Quote character not allowed as delimiter");
+		KLog.argException(argDelimiter == ' ', "Non-blank delimiter is required");
+		KLog.argException(argDelimiter == '\"', "Quote character not allowed as delimiter");
 		
 		if (rows == null) {
 			return (null);
@@ -902,9 +902,9 @@ public class KDB implements AutoCloseable{
 		KTimer timer = new KTimer();
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argStatement), "KDB.prepare(): SQL statement is required");
-		KLog.argException(argMaxRows < 0, "KDB.prepare(): argMaxRows value is invalid");
-		KLog.argException(argTimeOutSec < 0, "KDB.prepare(): argTimeOutSec value is invalid");
+		KLog.argException(K.isEmpty(argStatement), "SQL statement is required");
+		KLog.argException(argMaxRows < 0, "argMaxRows value is invalid");
+		KLog.argException(argTimeOutSec < 0, "argTimeOutSec value is invalid");
 		
 		// Check if database is connected
 		if (!isConnected()) {

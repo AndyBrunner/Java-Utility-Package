@@ -367,7 +367,7 @@ public class KLog {
 		}
 
 		// Replace {} parameters if present
-		String workString = K.isEmpty(argMessage) ? "KLog.argException(): No error message" : K.replaceParams(argMessage, argObjects);
+		String workString = K.isEmpty(argMessage) ? "No error message" : K.replaceParams(argMessage, argObjects);
 		
 		// Save error message even if logging is not active
 		K.saveError(workString);
@@ -511,8 +511,7 @@ public class KLog {
 			return;
 		}
 		
-		// Write log message
-		write(Level.SEVERE, formatLogMessage(argException.toString()));
+		// Format exception
 		logStackTrace(argException);
 	}
 	
@@ -722,6 +721,8 @@ public class KLog {
 			return;
 		}
 
+		write(Level.SEVERE, "Java Exception: " + argException.toString());
+		
 		// Format exception message and stack trace
 		StackTraceElement[] stackTraceElements = argException.getStackTrace();
 			
@@ -729,7 +730,7 @@ public class KLog {
 		for (StackTraceElement stackTraceElement : stackTraceElements) {
 			String stackElement = stackTraceElement.toString();
 			if (!stackElement.contains("ch.k43.util.KLog.")) {
-				write(Level.SEVERE, "Stack[" + stackPosition + "]: " + stackElement);
+				write(Level.SEVERE, "Stack Trace[" + stackPosition + "]: " + stackElement);
 				stackPosition++;
 			}
 		}

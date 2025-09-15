@@ -261,7 +261,7 @@ public class KHTTPClient {
 	public void setTimeOutSec(int argTimeOutSec) {
 		
 		// Check arguments
-		KLog.argException(argTimeOutSec < 0, "KHTTPClient.setTimeOutSec(): argTimeOutSec must not be negative");
+		KLog.argException(argTimeOutSec < 0, "argTimeOutSec must not be negative");
 		
 		gHTTPTimeOutSec = argTimeOutSec;
 	}
@@ -291,7 +291,7 @@ public class KHTTPClient {
 	private boolean xmit(String argHTTPMethod, String argURL, Properties argHeaders, byte[] argPayload) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argURL),  "KHTTPClient.xmit(): argURL must not be empty");
+		KLog.argException(K.isEmpty(argURL),  "argURL must not be empty");
 		
 		// Declarations
 		HttpURLConnection 	connection		= null;

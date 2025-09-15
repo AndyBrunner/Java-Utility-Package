@@ -86,7 +86,7 @@ public class KSMTPMailer {
 	public boolean addFile(String argFileName) {
 
 		// Check arguments
-		KLog.argException(K.isEmpty(argFileName), "KSMTPMailer.addFile(): File name is required");
+		KLog.argException(K.isEmpty(argFileName), "File name is required");
 		
 		try {
 			
@@ -116,7 +116,7 @@ public class KSMTPMailer {
 	public boolean addHTML(String argHTMLBody) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argHTMLBody), "KSMTPMailer.addHTML(): HTML string is required");
+		KLog.argException(K.isEmpty(argHTMLBody), "HTML string is required");
 		
 		try {
 			MimeBodyPart messageBodyPart = new MimeBodyPart(); 
@@ -156,8 +156,8 @@ public class KSMTPMailer {
 	public boolean addText(String argTextBody, String argCharSet) {
 
 		// Check arguments
-		KLog.argException(K.isEmpty(argTextBody), "KSMTPMailer.addText(): Text is required");
-		KLog.argException(K.isEmpty(argCharSet), "KSMTPMailer.addText(): Character set is required");
+		KLog.argException(K.isEmpty(argTextBody), "Text is required");
+		KLog.argException(K.isEmpty(argCharSet), "Character set is required");
 		
 		try {
 			MimeBodyPart messageBodyPart = new MimeBodyPart(); 
@@ -205,9 +205,9 @@ public class KSMTPMailer {
 	public boolean send() {
 
 		// Check if required data is present
-		KLog.argException(K.isEmpty(gFromAddress), "KSMTPMailer.send(): Sender is required");
-		KLog.argException(K.isEmpty(gToAddresses) && K.isEmpty(gCCAddresses) && K.isEmpty(gBCCAddresses), "KSMTPMailer.send(): Recipient is required");
-		KLog.argException(!gMultiPartAdded, "KSMTPMailer.send(): Mail body is required");
+		KLog.argException(K.isEmpty(gFromAddress), "Sender is required");
+		KLog.argException(K.isEmpty(gToAddresses) && K.isEmpty(gCCAddresses) && K.isEmpty(gBCCAddresses), "Recipient is required");
+		KLog.argException(!gMultiPartAdded, "Mail body is required");
 		
 		//
 		// Setup SMTP authentication class
@@ -401,8 +401,8 @@ public class KSMTPMailer {
 	public void setAuthentication(String argUserName, String argUserPassword) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argUserName), "KSMTPMailer.setAuthentication(): User name is required");
-		KLog.argException(K.isEmpty(argUserPassword), "KSMTPMailer.setAuthentication(): User password is required");
+		KLog.argException(K.isEmpty(argUserName), "User name is required");
+		KLog.argException(K.isEmpty(argUserPassword), "User password is required");
 		
 		gUserName				= argUserName;
 		gUserPassword			= argUserPassword;
@@ -459,8 +459,8 @@ public class KSMTPMailer {
 	public void setOAuth2Authentication(String argUserName, String argAccessToken) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argUserName), "KSMTPMailer.setOAuth2Authentication(): User name is required");
-		KLog.argException(K.isEmpty(argAccessToken), "KSMTPMailer.setOAuth2Authentication(): Access token is required");
+		KLog.argException(K.isEmpty(argUserName), "User name is required");
+		KLog.argException(K.isEmpty(argAccessToken), "Access token is required");
 		
 		gUserName				= argUserName;
 		gUserPassword			= argAccessToken;
@@ -499,8 +499,8 @@ public class KSMTPMailer {
 	public void setSMTPHost(String argSMTPHostName, int argSMTPHostPort) {
 
 		// Check arguments
-		KLog.argException(K.isEmpty(argSMTPHostName), "KSMTPMailer.setSMTPHost(): SMTP host name is required");
-		KLog.argException((argSMTPHostPort < 1) || (argSMTPHostPort > 65535), "KSMTPMailer.setSMTPHost(): SMTP host port must be between 1 and 65535");
+		KLog.argException(K.isEmpty(argSMTPHostName), "SMTP host name is required");
+		KLog.argException((argSMTPHostPort < 1) || (argSMTPHostPort > 65535), "SMTP host port must be between 1 and 65535");
 		
 		gSMTPHostName	= argSMTPHostName;
 		gSMTPHostPort	= argSMTPHostPort;

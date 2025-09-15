@@ -137,7 +137,7 @@ public abstract class KThread extends Thread {
 	 * Prohibit overwriting. 
 	 */
 	@Override
-	public final synchronized void start() {
+	public final void start() {
 		super.start();
 	}
 

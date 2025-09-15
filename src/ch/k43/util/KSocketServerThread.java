@@ -49,7 +49,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	protected KSocketServerThread(Socket argSocket) {
 	
 		// Check arguments
-		KLog.argException(K.isEmpty(argSocket), "KSocketServerThread(): argSocket is required");
+		KLog.argException(K.isEmpty(argSocket), "argSocket is required");
 		
 		// Save TLS socket
 		gSocket = argSocket;
@@ -272,7 +272,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	public int read(char[] argData) {
 	
 		// Check arguments
-		KLog.argException(K.isEmpty(argData), "KSocketServerThread.read(): argData must not be empty");
+		KLog.argException(K.isEmpty(argData), "argData must not be empty");
 		
 		// Declarations
 		int bytesRead = 0;
@@ -334,7 +334,7 @@ public abstract class KSocketServerThread extends Thread implements AutoCloseabl
 	 */
 	@Override
 	public void run() {
-		KLog.argException(true, "{}.run(): Method not implemented", gThisClassName);
+		KLog.argException(true, "Method run not implemented");
 	}
 	
 	/**

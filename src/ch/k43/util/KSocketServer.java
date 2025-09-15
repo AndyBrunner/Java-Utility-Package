@@ -158,8 +158,8 @@ public class KSocketServer implements AutoCloseable{
 	public KSocketServer(int argLocalPort, String argClassName, boolean argTLS, String argKeyStoreFileName, char[] argKeyStorePassword, String argTrustStoreFileName, char[] argTrustStorePassword) {
 
 		// Check arguments
-		KLog.argException(argLocalPort < 1 || argLocalPort > 65535, "KSocketServer(): argLocalPort must be between 1 and 65535");
-		KLog.argException(argTLS && (K.isEmpty(argKeyStoreFileName)), "KSocketServer(): Key store file name is required for TLS connections");		
+		KLog.argException(argLocalPort < 1 || argLocalPort > 65535, "argLocalPort must be between 1 and 65535");
+		KLog.argException(argTLS && (K.isEmpty(argKeyStoreFileName)), "Key store file name is required for TLS connections");		
 		
 		// Setup and start the socket server
 		try {

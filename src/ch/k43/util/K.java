@@ -25,7 +25,7 @@ import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.zip.Deflater;
@@ -49,7 +50,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.naming.directory.*;
 
 /**
- * Static class with a bunch of utility methods. 
+ * Static class with a bunch of related and unrelated utility methods. 
  */
 public class K {
 	
@@ -59,146 +60,146 @@ public class K {
 	/**
 	 * Package version number in the format yyyy.mm.dd.
 	 */
-	public static final		String				VERSION				= "2025.09.02";			// Also change docs/version-check/version.txt
+	public static final		String							VERSION				= "2025.09.15";			// Also change docs/version-check/version.txt
 	
 	/**
 	 * Application start time.
 	 */
-	public static final		Calendar			START_TIME			= Calendar.getInstance();
+	public static final		Calendar						START_TIME			= Calendar.getInstance();
 	
 	/**
 	 * Application instance UUID. Example is "D94CF874-5159-4B1F-8381-AA22812FFEDA".
 	 */
-	public static final		String				INSTANCE_UUID		= K.getUniqueID();
+	public static final		String							INSTANCE_UUID		= K.getUniqueID();
 	
 	/**
 	 * Platform dependent line separator. Examples are "\r", "\n", "\r\n".
 	 */
-	public static final 	String				LINE_SEPARATOR		= System.lineSeparator();
+	public static final 	String							LINE_SEPARATOR		= System.lineSeparator();
 	
 	/**
 	 * Platform dependent file separator. Examples are "/", "\".
 	 */
-	public static final 	String				FILE_SEPARATOR		= File.separator;
+	public static final 	String							FILE_SEPARATOR		= File.separator;
 	
 	/**
 	 * Platform dependent path separator. Examples are ":", ";".
 	 */
-	public static final 	String				PATH_SEPARATOR		= File.pathSeparator;
+	public static final 	String							PATH_SEPARATOR		= File.pathSeparator;
 	
 	/**
 	 * User name. Examples are "joesmith", "bob".
 	 */
-	public static final 	String				USER_NAME			= System.getProperty("user.name", "n/a").trim();
+	public static final 	String							USER_NAME			= System.getProperty("user.name", "n/a").trim();
 	
 	/**
 	 * User directory. The returned string is terminated with the platform dependent file separator.
 	 */
-	public static final 	String				CURRENT_DIRECTORY;	// Initialized in static block
+	public static final 	String							CURRENT_DIRECTORY;	// Initialized in static block
 	
 	/**
 	 * Home directory. The returned string is terminated with the platform dependent file separator.
 	 */
-	public static final 	String				HOME_DIRECTORY;		// Initialized in static block
+	public static final 	String							HOME_DIRECTORY;		// Initialized in static block
 	
 	/**
 	 * Temporary file directory. The returned string is terminated with the platform dependent file separator.
 	 */
-	public static final 	String				TEMP_DIRECTORY;		// Initialized in static block
+	public static final 	String							TEMP_DIRECTORY;		// Initialized in static block
 	
 	/**
 	 * User language. Examples are "en", "fr", "de".
 	 */
-	public static final 	String				USER_LANGUAGE		= System.getProperty("user.language", "en").trim();
+	public static final 	String							USER_LANGUAGE		= System.getProperty("user.language", "en").trim();
 	
 	/**
 	 * Default encoding. Example is "UTF-8".
 	 */
-	public static final 	String				DEFAULT_ENCODING	= System.getProperty("native.encoding", "UTF-8").trim();
+	public static final 	String							DEFAULT_ENCODING	= System.getProperty("native.encoding", "UTF-8").trim();
 	
 	/**
 	 * JVM major version number
 	 */
-	public static final		int					JVM_MAJOR_VERSION;	// Initialized in static block
+	public static final		int								JVM_MAJOR_VERSION;	// Initialized in static block
 
 	/**
 	 * JVM version name. Example is "Java HotSpot(TM) 64-Bit Server VM - Oracle Corporation"
 	 */
-	public static final 	String				JVM_VERSION_NAME	= System.getProperty("java.vm.name", "n/a").trim() + " - " + System.getProperty("java.vendor", "n/a").trim();
+	public static final 	String							JVM_VERSION_NAME	= System.getProperty("java.vm.name", "n/a").trim() + " - " + System.getProperty("java.vendor", "n/a").trim();
 
 	/**
 	 * JVM platform. Example is "Mac OS X Version 15.3.1/aarch64"
 	 */
-	public static final 	String				JVM_PLATFORM		= System.getProperty("os.name", "n/a").trim() + " Version " + System.getProperty("os.version", "n/a").trim() + '/' +  System.getProperty("os.arch", "n/a").trim();
+	public static final 	String							JVM_PLATFORM		= System.getProperty("os.name", "n/a").trim() + " Version " + System.getProperty("os.version", "n/a").trim() + '/' +  System.getProperty("os.arch", "n/a").trim();
 	
 	/**
 	 * Minimum JVM version supported
 	 */
-	public static final 	int					JVM_MINIMAL_VERSION	= 8;
+	public static final 	int								JVM_MINIMAL_VERSION	= 8;
 	
 	/**
 	 * Maximum number of saved errors
 	 */
-	public static final		int					MAX_SAVED_ERRORS	= 10;
+	public static final		int								MAX_SAVED_ERRORS	= 10;
 	
 	/**
 	 * Value of KiB
 	 */
-	public static final 	double				SIZE_KIB			= 1_024d;
+	public static final 	double							SIZE_KIB			= 1_024d;
 
 	/**
 	 * Value of MiB
 	 */
-	public static final 	double				SIZE_MIB			= SIZE_KIB * 1_024d;
+	public static final 	double							SIZE_MIB			= SIZE_KIB * 1_024d;
 	
 	/**
 	 * Value of GiB
 	 */
-	public static final 	double				SIZE_GIB			= SIZE_MIB * 1_024d;
+	public static final 	double							SIZE_GIB			= SIZE_MIB * 1_024d;
 	
 	/**
 	 * Value of TiB
 	 */
-	public static final 	double				SIZE_TIB 			= SIZE_GIB * 1_024d;
+	public static final 	double							SIZE_TIB 			= SIZE_GIB * 1_024d;
 	
 	/**
 	 * Value of PiB
 	 */
-	public static final		double				SIZE_PIB 			= SIZE_TIB * 1_024d;
+	public static final		double							SIZE_PIB 			= SIZE_TIB * 1_024d;
 	
 	/**
 	 * Value of EiB
 	 */
-	public static final 	double				SIZE_EIB 			= SIZE_PIB * 1_024d;
+	public static final 	double							SIZE_EIB 			= SIZE_PIB * 1_024d;
 	
 	/**
 	 * Value of ZiB
 	 */
-	public static final 	double				SIZE_ZIB 			= SIZE_EIB * 1_024d;
+	public static final 	double							SIZE_ZIB 			= SIZE_EIB * 1_024d;
 	
 	/**
 	 * Value of YiB
 	 */
-	public static final 	double				SIZE_YIB 			= SIZE_ZIB * 1_024d;
+	public static final 	double							SIZE_YIB 			= SIZE_ZIB * 1_024d;
 	
 	/**
 	 * Default buffer size for file operations
 	 */
-	public static final		int					FILE_IO_BUFFER_SIZE	= 4_096;
+	public static final		int								FILE_IO_BUFFER_SIZE	= 4_096;
 	
 	//
 	// Private class constants
 	//
-	private static final	Random				SIMPLE_RANDOMIZER	= new Random();
-	private static final	SecureRandom		SECURE_RANDOM		= new SecureRandom();
-	private static final 	String				VERSION_URL			= "https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt";	
-	private static final 	String				AES_256_CIPHER		= "AES/CBC/PKCS5Padding";
-	private static final 	String				SHA_256				= "SHA-256";
+	private static final	Random							SIMPLE_RANDOMIZER	= new Random();
+	private static final	SecureRandom					SECURE_RANDOM		= new SecureRandom();
+	private static final 	String							VERSION_URL			= "https://andybrunner.github.io/Java-Utility-Package/version-check/version.txt";	
+	private static final 	String							AES_256_CIPHER		= "AES/CBC/PKCS5Padding";
+	private static final 	String							SHA_256				= "SHA-256";
 
 	//
 	// Private class variables. This structure is created whenever a static function need to store local data per thread.
 	//
-	private static ConcurrentHashMap<Thread, KLocalData>	gLocalData			= new ConcurrentHashMap<>(1);		
+	private static ConcurrentHashMap<Thread, KLocalData>	gLocalData			= new ConcurrentHashMap<>();		
 
 	//
 	// Static block to initialize class
@@ -373,7 +374,7 @@ public class K {
 	public static byte[] concat(byte[] arg1, byte[] arg2) {
 		
 		// Check arguments
-		KLog.argException(arg1 == null && arg2 == null, "K.concat(): arg1 and arg2 cannot be both null");
+		KLog.argException(arg1 == null && arg2 == null, "arg1 and arg2 cannot be both null");
 
 		if (arg1 != null && arg2 == null) {
 			return arg1;
@@ -405,7 +406,7 @@ public class K {
 	public static char[] concat(char[] arg1, char[] arg2) {
 		
 		// Check arguments
-		KLog.argException(arg1 == null && arg2 == null, "K.concat(): arg1 and arg2 cannot be both null");
+		KLog.argException(arg1 == null && arg2 == null, "arg1 and arg2 cannot be both null");
 
 		if (arg1 != null && arg2 == null) {
 			return arg1;
@@ -469,7 +470,7 @@ public class K {
     		return "";
     	}
 
-    	KLog.argException(argDelimiter == '"', "K.decodeCSV(): Double quote character not allowed as field delimiter");
+    	KLog.argException(argDelimiter == '"', "Double quote character not allowed as field delimiter");
 		
     	String csvString = argBuffer;
     	
@@ -745,8 +746,8 @@ public class K {
 	public static byte[] decryptAES256(byte[] argBuffer, byte[] argSecretKey, byte[] argInitVector) {
 
 		// Check arguments
-		KLog.argException(K.isEmpty(argSecretKey), "K.decryptAES256(): Secret key is required");
-		KLog.argException(K.isEmpty(argInitVector) || (argInitVector.length != 16), "K.decryptAES256(): AES-256 cipher initialization vector must be 16 bytes (128 bits)");
+		KLog.argException(K.isEmpty(argSecretKey), "Secret key is required");
+		KLog.argException(K.isEmpty(argInitVector) || (argInitVector.length != 16), "AES-256 cipher initialization vector must be 16 bytes (128 bits)");
 		
 		if (K.isEmpty(argBuffer)) {
 			return new byte[0];
@@ -844,7 +845,7 @@ public class K {
     		return ("\"\"");
     	}
 
-    	KLog.argException(argDelimiter == '"', "K.encodeCSV(): Double quote character not allowed as field delimiter");
+    	KLog.argException(argDelimiter == '"', "Double quote character not allowed as field delimiter");
     	
     	String	csvString	= argBuffer;
     	boolean quoteFlag	= false;
@@ -1119,8 +1120,8 @@ public class K {
 	public static byte[] encryptAES256(byte[] argBuffer, byte[] argSecretKey, byte[] argInitVector) {
 				
 		// Check arguments
-		KLog.argException(K.isEmpty(argSecretKey), "K.encryptAES256(): Secret key is required");
-		KLog.argException(K.isEmpty(argInitVector) || (argInitVector.length != 16), "K.encryptAES256(): AES-256 cipher initialization vector must be 16 bytes (128 bits)");
+		KLog.argException(K.isEmpty(argSecretKey), "Secret key is required");
+		KLog.argException(K.isEmpty(argInitVector) || (argInitVector.length != 16), "AES-256 cipher initialization vector must be 16 bytes (128 bits)");
 
 		if (K.isEmpty(argBuffer)) {
 			return new byte[0];
@@ -1203,7 +1204,7 @@ public class K {
 	public static byte[] generateHash(String argHashType, byte[] argBuffer) {
 
 		// Check argument
-		KLog.argException(K.isEmpty(argHashType), "K.generateHash(): Hash algorithm is required");
+		KLog.argException(K.isEmpty(argHashType), "Hash algorithm is required");
 
 		// Declarations
 		String hashType = argHashType.toUpperCase();
@@ -1217,7 +1218,7 @@ public class K {
 				!hashType.equals("SHA3-256") &&
 				!hashType.equals("SHA3-384") &&
 				!hashType.equals("SHA3-512"),
-				"K.generateHash(): Hash algorithm must be MD5, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-384 or SHA3-512");	// 2024.05.23
+				"Hash algorithm must be MD5, SHA-256, SHA-384, SHA-512, SHA3-256, SHA3-384 or SHA3-512");	// 2024.05.23
 
 
 		if (K.isEmpty(argBuffer)) {
@@ -1273,8 +1274,8 @@ public class K {
 	public static Certificate getCertificate(String argFileName, char[] argFilePassword, String argKey) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argFileName), "K.getCertificate(): argFileName is required");
-		KLog.argException(K.isEmpty(argKey), "K.getCertificate(): argKey is required");
+		KLog.argException(K.isEmpty(argFileName), "argFileName is required");
+		KLog.argException(K.isEmpty(argKey), "argKey is required");
 		
         try {
         	// Load Java KeyStore File (JKS)
@@ -1444,7 +1445,7 @@ public class K {
 	public static String getIPAddress(String argHostname) {
 
 		// Check argument
-		KLog.argException(K.isEmpty(argHostname), "K.getIPAddress(): Host name is required");
+		KLog.argException(K.isEmpty(argHostname), "Host name is required");
 		
 		try {
 			return InetAddress.getByName(argHostname).getHostAddress();
@@ -1535,11 +1536,16 @@ public class K {
 	 */
 	public static String getLastError() {
 		
-		synchronized (gLocalData) {
-			ArrayList<String> lastErrorArray = K.getLocalData().kLastErrors;
-			String[] lastErrors = lastErrorArray.toArray(new String[lastErrorArray.size()]);
-			return lastErrors.length == 0 ? null : lastErrors[0];
+		// Get local thread data
+		KLocalData	localData	= K.getLocalData();
+		String[]	lastErrors	= null;
+		
+		synchronized (localData.lock) {
+			ArrayList<String> lastErrorArray = localData.kLastErrors;
+			lastErrors = lastErrorArray.toArray(new String[lastErrorArray.size()]);
 		}
+		
+		return (lastErrors.length == 0 ? null : lastErrors[0]);
 	}
 	
 	/**
@@ -1551,9 +1557,12 @@ public class K {
 	 */
 	public static String[] getLastErrors() {
 		
-		synchronized (gLocalData) {
-			ArrayList<String> lastErrorArray = K.getLocalData().kLastErrors;
-			return lastErrorArray.toArray(new String[lastErrorArray.size()]);
+		// Get local thread data
+		KLocalData localData = K.getLocalData();
+		
+		synchronized (localData.lock) {
+			ArrayList<String> lastErrorArray = localData.kLastErrors;
+			return (lastErrorArray.toArray(new String[lastErrorArray.size()]));
 		}
 	}
 	
@@ -1588,7 +1597,8 @@ public class K {
 				gLocalData.remove(thread);
 			}
 		} 
-			
+
+		// Get local data object or create new
 		KLocalData localData = gLocalData.get(Thread.currentThread());
 			
 		// Create local data object if it does not exist
@@ -1651,9 +1661,9 @@ public class K {
 		KTimer timer = new KTimer();
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argPassword), "K.getPasswordHash(): argPassword is required");
-		KLog.argException(K.isEmpty(argSalt), "K.getPasswordHash(): argSalt is required");
-		KLog.argException(argIteration < 1, "K.getPasswordHash(): argIteration must be a positive integer");
+		KLog.argException(K.isEmpty(argPassword), "argPassword is required");
+		KLog.argException(K.isEmpty(argSalt), "argSalt is required");
+		KLog.argException(argIteration < 1, "argIteration must be a positive integer");
 		
 		// Append salt to password
 		byte[] passwordHash = new byte[argPassword.length + argSalt.length];
@@ -1693,8 +1703,8 @@ public class K {
 	public static byte[] getPasswordHash(String argPassword, String argSalt) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argPassword), "K.getPasswordHash(): argPassword is required");
-		KLog.argException(K.isEmpty(argSalt), "K.getPasswordHash(): argSalt is required");
+		KLog.argException(K.isEmpty(argPassword), "argPassword is required");
+		KLog.argException(K.isEmpty(argSalt), "argSalt is required");
 		
 		return getPasswordHash(argPassword.getBytes(StandardCharsets.UTF_8), argSalt.getBytes(StandardCharsets.UTF_8), 500_000);
 	}
@@ -1714,8 +1724,8 @@ public class K {
 	public static PrivateKey getPrivateKey(String argFileName, char[] argFilePassword, String argKey, char[] argKeyPassword) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argFileName), "K.getPrivateKey(): argFileName is required");
-		KLog.argException(K.isEmpty(argKey), "K.getPrivateKey(): argKey is required");
+		KLog.argException(K.isEmpty(argFileName), "argFileName is required");
+		KLog.argException(K.isEmpty(argKey), "argKey is required");
 		
         try (FileInputStream fis = new FileInputStream(argFileName)) {
         	
@@ -1763,8 +1773,8 @@ public class K {
 	public static PublicKey getPublicKey(String argFileName, char[] argFilePassword, String argKey) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argFileName), "K.getPublicKey(): argFileName is required");
-		KLog.argException(K.isEmpty(argKey), "K.getPublicKey(): argKey is required");
+		KLog.argException(K.isEmpty(argFileName), "argFileName is required");
+		KLog.argException(K.isEmpty(argKey), "argKey is required");
 		
 		// Get certificate
 		Certificate certificate = K.getCertificate(argFileName, argFilePassword, argKey);
@@ -1787,7 +1797,7 @@ public class K {
 	public static byte[] getRandomBytes(int argLength) {
 	   
 		// Check initialization vector
-		KLog.argException(argLength < 1, "K.getRandomBytes(): Number of bytes to randomized must be > 0");
+		KLog.argException(argLength < 1, "Number of bytes to randomized must be > 0");
 		
 		// Generate random bytes
 		byte[] buffer = new byte[argLength];
@@ -1809,7 +1819,7 @@ public class K {
 	public static int getRandomInt(int argMinInt, int argMaxInt) {
 		
 		// Check argument
-		KLog.argException(argMinInt >= argMaxInt, "K.getRandomInt(): Minimum value must be smaller than maximum value");
+		KLog.argException(argMinInt >= argMaxInt, "Minimum value must be smaller than maximum value");
 		
 		// Return random integer
 	    return SIMPLE_RANDOMIZER.nextInt(argMaxInt - argMinInt + 1) + argMinInt;
@@ -1849,7 +1859,7 @@ public class K {
 	public static String getTimeISO8601(LocalDateTime argDateTime) {
 
 		// Check argument
-		KLog.argException(K.isEmpty(argDateTime), "K.getTimeISO8601(): argDateTime is required");
+		KLog.argException(K.isEmpty(argDateTime), "argDateTime is required");
 		
         return argDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"));
 	}
@@ -1863,13 +1873,14 @@ public class K {
 	public static String getTimeISO8601(Calendar argDateTime) {
 		
 		// Check argument
-		KLog.argException(K.isEmpty(argDateTime), "K.getTimeISO8601(): argDateTime is required");
+		KLog.argException(K.isEmpty(argDateTime), "argDateTime is required");
 
-		// Convert to local zoned date and time
-	    ZonedDateTime zonedDateTime = argDateTime.toInstant().atZone(argDateTime.getTimeZone().toZoneId());
-
-        return DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(zonedDateTime);
-	}
+		// Convert Calendar to Instant > apply time zone > convert to LocalDateTime
+        return getTimeISO8601(argDateTime.getTime()
+        		.toInstant()
+        		.atZone(ZoneId.systemDefault())
+        		.toLocalDateTime());
+ 	}
 	
 	/**
 	 * Return unique id (Example: 27F1E0F5-186F-48FF-BA46-10E6E4A0FAA0).
@@ -1923,7 +1934,7 @@ public class K {
 	public static byte[] hexToBytes(String argHexString) {
 
 		// Check argument
-	    KLog.argException(K.isEmpty(argHexString) || argHexString.length() % 2 != 0, "K.hexToBytes(): Hex string must have an even length");
+	    KLog.argException(K.isEmpty(argHexString) || argHexString.length() % 2 != 0, "Hex string must have an even length");
 
 	    int		hexLength	= argHexString.length();
 	    byte[]	data		= new byte[hexLength / 2];
@@ -1944,34 +1955,43 @@ public class K {
 	 * @since 2024.05.20
 	 */
 	public static boolean isEmpty(Object argObject) {
-		
+
 		// Check if object is null
 		if (argObject == null) {
 			return true;
 		}
-		
-		// Check if String is empty
-		if ((argObject instanceof String) && ((String) argObject).isEmpty()) {
-			return true;
-		}
-		
-	    // Check if Collection (List, Set, etc.) is empty
-	    if (argObject instanceof Collection && ((Collection<?>) argObject).isEmpty()) {
-	        return true;
-	    }
-	    
-        // Check if Map (HashMap, Properties, etc.) is empty
-        if (argObject instanceof Map && ((Map<?, ?>) argObject).isEmpty()) {
-            return true;
+        
+        // CharSequences (Strings, StringBuilder, StringBuffer)
+        if (argObject instanceof CharSequence) {
+        	if (argObject instanceof String) {
+                return ((String) argObject).isEmpty();
+            } else {
+                return ((CharSequence) argObject).toString().isEmpty();
+            }
+        }
+
+        // Arrays (including primitive arrays)
+        if (argObject.getClass().isArray()) {
+            return Array.getLength(argObject) == 0;
         }
         
-        // Check if array (including primitive arrays) is empty
-        if (argObject.getClass().isArray() && Array.getLength(argObject) == 0) {
-            return true;
+        // Collections (List, Set, etc.)
+        if (argObject instanceof Collection) {
+            return ((Collection<?>) argObject).isEmpty();
         }
-        
-		// May add other object type checks in the future
-		return false;
+
+        // Maps (HashMap, Properties, etc.)
+        if (argObject instanceof Map) {
+            return ((Map<?, ?>) argObject).isEmpty();
+        }
+
+        // Optionals (Java 8 style)
+        if (argObject instanceof Optional) {
+            return !((Optional<?>) argObject).isPresent();
+        }
+
+        // For everything else assume not empty
+        return false;
 	}
 	
 	/**
@@ -1999,7 +2019,7 @@ public class K {
 	public static boolean isInteger(String argString, int argMinimum, int argMaximum) {
 
 		// Check arguments
-		KLog.argException(argMaximum < argMinimum, "K.isInteger(): argMinimum must be smaller than argMaximum");
+		KLog.argException(argMaximum < argMinimum, "argMinimum must be smaller than argMaximum");
 		
 		if (K.isEmpty(argString)) {
 			return false;
@@ -2038,7 +2058,7 @@ public class K {
 	public static boolean isMinumumVersion(String argVersion) {
 
 		// Check argument
-		KLog.argException(K.isEmpty(argVersion) || argVersion.length() != 10, "K.isMinimumVersion(): Version number must be 10 character (e.g. 2025.08.30)");
+		KLog.argException(K.isEmpty(argVersion) || argVersion.length() != 10, "Version number must be 10 character (e.g. 2025.08.30)");
 		
 		return (argVersion.compareTo(K.VERSION) <= 0);
 	}
@@ -2088,7 +2108,7 @@ public class K {
 	public static boolean isNumber(String argString, double argMinimum, double argMaximum) {
 		
 		// Check arguments
-		KLog.argException(argMaximum < argMinimum, "K.isNumber(): argMinimum must be smaller than argMaximum");
+		KLog.argException(argMaximum < argMinimum, "argMinimum must be smaller than argMaximum");
 
 		if (K.isEmpty(argString)) {
 			return false;
@@ -2160,7 +2180,7 @@ public class K {
 	public static Class<?> loadClass(String argClassName) {
 		
 		// Check argument
-		KLog.argException(K.isEmpty(argClassName), "K.loadClass(): Class name is required");
+		KLog.argException(K.isEmpty(argClassName), "Class name is required");
 		
 		// Get class loader
 	    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -2188,7 +2208,7 @@ public class K {
 	public static KeyStore loadKeyStore(String argFileName, char[] argPassword) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argPassword), "K.loadKeyStore(): argFileName must not be empty");
+		KLog.argException(K.isEmpty(argPassword), "argFileName must not be empty");
 		
 	    KLog.debug("Loading Java KeyStore File {}", argFileName);
 		
@@ -2216,8 +2236,8 @@ public class K {
 	public static String[] queryDNS(String argDNSRecordType, String argMailDomain) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argDNSRecordType), "K.queryDNS(): DNS RR type is mandatory");
-		KLog.argException(K.isEmpty(argMailDomain), "K.queryDNS(): DNS domain name is mandatory");
+		KLog.argException(K.isEmpty(argDNSRecordType), "DNS RR type is mandatory");
+		KLog.argException(K.isEmpty(argMailDomain), "DNS domain name is mandatory");
 		
 		// Declarations
         String[]	dnsRecords	= null;
@@ -2314,8 +2334,8 @@ public class K {
 	public static String repeat(String argString, int argCount) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argString), "K.repeat(): argString must not be empty");
-		KLog.argException(argCount < 1 || argCount > 1000000, "K.repeat(): argCount must be between 1 and 1000000");
+		KLog.argException(K.isEmpty(argString), "argString must not be empty");
+		KLog.argException(argCount < 1 || argCount > 1000000, "argCount must be between 1 and 1000000");
 		
 		StringBuilder newString = new StringBuilder(argString.length() * argCount);
 
@@ -2408,10 +2428,10 @@ public class K {
             return "";
         }
 
-		// Write prompt (if given)
+		// Write prompt without new line
 		if (!K.isEmpty(argPrompt)) {
 			KLog.debug("Console prompt: {} ({} characters)", argPrompt, argPrompt.length());
-			System.out.print(argPrompt);
+			writeConsole(false, argPrompt);
 		}
 		
 		// Get console input
@@ -2517,22 +2537,27 @@ public class K {
 	 * 
 	 * @since 2025.02.02
 	 */
-	public static synchronized void saveError(String argMessage) {
+	public static void saveError(String argMessage) {
 		
 		// Ignore empty message
 		if (K.isEmpty(argMessage)) {
 			return;
 		}
 		
+		// Get local thread data
 		KLocalData localData = K.getLocalData();
+		
+		synchronized (localData.lock) {
 			
-		// Delete oldest error message if maximum number of errors reached
-		if (localData.kLastErrors.size() == MAX_SAVED_ERRORS) {
-			localData.kLastErrors.removeLast();
+			// Delete oldest error messages up to the allowed maximum number
+			while (localData.kLastErrors.size() >= MAX_SAVED_ERRORS) {
+				localData.kLastErrors.removeLast();
+			}
+				
+			localData.kLastErrors.add(0, argMessage);
 		}
-			
-		localData.kLastErrors.add(0, argMessage);
-		KLog.debug("Error message saved: {}", argMessage);
+		
+		KLog.debug("Saved error message: {}", argMessage);
 	}
 	
 	/**
@@ -2589,7 +2614,7 @@ public class K {
 		final int WAIT_TIME_MS = 100;
 		
 		// Check arguments
-		KLog.argException(argTimeOutSec < 0 || argTimeOutSec > 60, "K.stopThread(): argTimeOutSec must be between 0 and 60");
+		KLog.argException(argTimeOutSec < 0 || argTimeOutSec > 60, "argTimeOutSec must be between 0 and 60");
 		
 		// Check if thread is running
 		if ((argThread == null) || (!argThread.isAlive())) {
@@ -2746,7 +2771,7 @@ public class K {
 	public static String toPEM(Object argObject, char[] argPassword, boolean argComments) {
 		
 		// Check argument
-		KLog.argException(argObject == null, "K.toPEM(): argObject is required");
+		KLog.argException(argObject == null, "argObject is required");
 		
     	StringBuilder	pemString		= new StringBuilder();
 		String			generatorString	= "# PEM-Created: " + K.getTimeISO8601() + " (" + K.class.getName() + '/' + K.VERSION + ")\n";
@@ -2889,7 +2914,7 @@ public class K {
 	        	return pemString.toString();
 	        	
 	        } else {
-	            KLog.argException("K.toPEM(): Unsupported object type {}", argObject.getClass().getName());
+	            KLog.argException("Unsupported object type {}", argObject.getClass().getName());
 	            return "";
 	        }
 		
@@ -2938,9 +2963,9 @@ public class K {
 	public static String truncateMiddle(String argString, int argMaxLength, String argEllipsis) {
 		
 		// Check parameters
-		KLog.argException(K.isEmpty(argString), "K.truncateMiddle(): argString must not be empty");
-		KLog.argException(K.isEmpty(argEllipsis), "K.truncateMiddle(): argEllipsis must not be empty");
-		KLog.argException(argMaxLength < 1 || argMaxLength < (argEllipsis.length() + 2), "K.truncateMiddle(): argMaxLength too small for argEllipsis");
+		KLog.argException(K.isEmpty(argString), "argString must not be empty");
+		KLog.argException(K.isEmpty(argEllipsis), "argEllipsis must not be empty");
+		KLog.argException(argMaxLength < 1 || argMaxLength < (argEllipsis.length() + 2), "argMaxLength too small for argEllipsis");
 		
 		// Check if string does not needed to be shortened
 		if (argString.length() <= argMaxLength) {
@@ -3018,6 +3043,42 @@ public class K {
 		}
 	}
     
+	/**
+	 * Write message with optional parameters to the console.
+	 * 
+	 * @param argNewLine		Add newline to message
+	 * @param argMessage		Message to be written
+	 * @param argParameters		Replacement parameters
+	 * 
+	 * @since 2025.09.05
+	 */
+	public static void writeConsole(boolean argNewLine, String argMessage, Object ... argParameters) {
+
+		if (K.isEmpty(argMessage)) {
+			return;
+		}
+		
+		String message = K.replaceParams(argMessage, argParameters);
+		
+		if (argNewLine) {
+			System.out.println(message);
+		} else {
+			System.out.print(message);
+		}
+	}
+	
+	/**
+	 * Write message with optional parameters to the console.
+	 * 
+	 * @param argNewLine	Message to be written
+	 * @param argParameters	Replacement parameters
+	 * 
+	 * @since 2025.09.05
+	 */
+	public static void writeConsole(String argNewLine, Object ... argParameters) {
+		writeConsole(true, argNewLine, argParameters);
+	}
+	
     /**
 	 * Private constructor to prevent class instantiation
 	 */

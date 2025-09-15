@@ -100,7 +100,7 @@ public class KCmdArgParser {
 			}
 			
 			// Check syntax
-			KLog.argException(!arg.matches(REGEX_PATTERN_SYNTAX), "KCmdArgParser: Invalid parser syntax definition: {}", arg);
+			KLog.argException(!arg.matches(REGEX_PATTERN_SYNTAX), "Invalid parser syntax definition: {}", arg);
 
 			// Process required or optional flag
 			boolean argRequired			= arg.startsWith("!");
@@ -116,15 +116,15 @@ public class KCmdArgParser {
 			boolean longOption			= arg.matches(REGEX_PATTERN_LONG_OPTION);
 			boolean cmdArgument			= arg.matches(REGEX_PATTERN_CMD_ARGUMENT);
 
-			KLog.argException(!shortOption && !longOption && !cmdArgument, "KCmdArgParser: Invalid pattern syntax: {}", arg);
+			KLog.argException(!shortOption && !longOption && !cmdArgument, "Invalid pattern syntax: {}", arg);
 			
 			// Process argument
 			if (cmdArgument) {
 
 				// Check if option value flag given
-				KLog.argException(argValueRequired || argValueOptional, "KCmdArgParser: Argument syntax does not allow option value flag");
+				KLog.argException(argValueRequired || argValueOptional, "Argument syntax does not allow option value flag");
 				
-				KLog.argException(gPatternNames.containsKey(".") || gPatternNames.containsKey(".."), "KCmdArgParser: Only single argument pattern allowed: {}", arg);
+				KLog.argException(gPatternNames.containsKey(".") || gPatternNames.containsKey(".."), "Only single argument pattern allowed: {}", arg);
 
 				gPatternNames.put(arg, argRequired);
 				gPatternValueRequired.put(arg, false);
@@ -132,7 +132,7 @@ public class KCmdArgParser {
 
 			} else {
 				
-				KLog.argException(gPatternNames.containsKey(arg), "KCmdArgParser: Duplicate option pattern not allowed: {}", arg);
+				KLog.argException(gPatternNames.containsKey(arg), "Duplicate option pattern not allowed: {}", arg);
 				
 				gPatternNames.put(arg, argRequired);
 				gPatternValueRequired.put(arg, argValueRequired);

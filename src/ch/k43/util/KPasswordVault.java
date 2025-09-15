@@ -48,9 +48,9 @@ public final class KPasswordVault {
 	public KPasswordVault(byte[] argSalt, int argIterations, byte[] argPasswordHash) {
 	
 		// Check arguments
-		KLog.argException(K.isEmpty(argSalt) || argSalt.length != SALT_SIZE_BYTES, "KPasswordVault: argSalt must be " + SALT_SIZE_BYTES + " bytes long");
-		KLog.argException(argIterations < 1_000 || argIterations > 10_000_000, "KPasswordVault: argIterations must be between 1000 and 10000000");
-		KLog.argException(K.isEmpty(argPasswordHash) || argPasswordHash.length != 64, "KPasswordVault: argPasswordHash must be 64 bytes long");
+		KLog.argException(K.isEmpty(argSalt) || argSalt.length != SALT_SIZE_BYTES, "argSalt must be " + SALT_SIZE_BYTES + " bytes long");
+		KLog.argException(argIterations < 1_000 || argIterations > 10_000_000, "argIterations must be between 1000 and 10000000");
+		KLog.argException(K.isEmpty(argPasswordHash) || argPasswordHash.length != 64, "argPasswordHash must be 64 bytes long");
 		
 		gSalt			= argSalt;
 		gIterations		= argIterations;
@@ -87,8 +87,8 @@ public final class KPasswordVault {
 	public KPasswordVault(char[] argPassword, int argIterations, char[] argPepper) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argPassword), "KPasswordVault: argPassword must not be empty");
-		KLog.argException(argIterations < 1_000 || argIterations > 10_000_000, "KPasswordVault: argIterations must be between 1000 and 10000000");
+		KLog.argException(K.isEmpty(argPassword), "argPassword must not be empty");
+		KLog.argException(argIterations < 1_000 || argIterations > 10_000_000, "argIterations must be between 1000 and 10000000");
 		
 		// Start timer
 		KTimer timer = new KTimer();
@@ -143,7 +143,7 @@ public final class KPasswordVault {
 	private final boolean constantTimeCompare(byte[] arg1, byte[] arg2) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(arg1) || K.isEmpty(arg2), "KPasswordVault.constantTimeCompare(): arg1 and arg2 must not be empty");
+		KLog.argException(K.isEmpty(arg1) || K.isEmpty(arg2), "arg1 and arg2 must not be empty");
 
 		if (arg1.length != arg2.length) {
 			return false;
@@ -209,8 +209,8 @@ public final class KPasswordVault {
 	private final byte[] hashPassword(char[] argPassword, byte[] argSalt, int argIterations, char[] argPepper) {
 		
 		// Check arguments
-		KLog.argException(K.isEmpty(argPassword) || K.isEmpty(argSalt), "KPasswordVault.hashPassword(): argPassword/argSalt must not be empty");
-		KLog.argException(argIterations < 1_000 || argIterations > 10_000_000, "KPasswordVault.hashPassword(): argIterations must be between 1000 and 10000000");
+		KLog.argException(K.isEmpty(argPassword) || K.isEmpty(argSalt), "argPassword/argSalt must not be empty");
+		KLog.argException(argIterations < 1_000 || argIterations > 10_000_000, "argIterations must be between 1000 and 10000000");
 		
 		// Declarations
 		char[]	combinedPassword	= new char[argPassword.length + (K.isEmpty(argPepper) ? 0 : argPepper.length)];
@@ -267,7 +267,7 @@ public final class KPasswordVault {
 	public final boolean isPasswordValid(char[] argPassword, char[] argPepper) {
 
 		// Check arguments
-		KLog.argException(K.isEmpty(argPassword), "KPasswordVault.isPasswordValid(): argPassword must not be empty");
+		KLog.argException(K.isEmpty(argPassword), "argPassword must not be empty");
 		
 		// Hash password with salt
 		byte[] passwordHash	= hashPassword(argPassword, gSalt, gIterations, argPepper);
